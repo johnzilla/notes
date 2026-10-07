@@ -6,7 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.10 — peer review draft |
+| **Version** | 0.11 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -64,7 +64,7 @@ The scenario tables below state **protocol consequences and evidence requirement
 | Claim to establish | Required evidence and verification |
 | :---- | :---- |
 | **Who can spend** | Complete output policy, matched to the relevant outputs; every spending path; a mapping from keys or shares to actual controllers, including backups and recovery authority. |
-| **Who can block spending** | All available spending paths at the relevant time, plus required signing software, data, authentication, communication, and broadcast services. Separate signer refusal from other availability failures. |
+| **Who can block spending** | All available spending paths at the relevant time, plus required signing software, data, authentication, communication, and broadcast services. Include forced or withheld software updates, discontinued software or backend services, and recovery formats that only one implementation reads. Separate signer refusal from other availability failures. |
 | **A control is consensus-enforced** | Identify the consensus rule and show that no alternate path bypasses the claimed restriction. |
 | **A signer verifies authorization** | Show how it authenticates the intended wallet policy and transaction. Verify destination, amount, fees, and change handling against trusted information. |
 | **Recovery works without a service** | A documented restoration and spend using the retained material, with that service unavailable; record software versions and the path exercised. |
@@ -122,7 +122,7 @@ One key authorizes spending. Online software, an isolated signing device, and an
 | **Recovery** | Retain the applicable secret format, derivation paths, script type, account information, and any additional secret required to restore. Demonstrate address recovery and signing. |
 | **Transaction integrity** | Establish how the recipient is authenticated and compared with the signed transaction. An accurate display cannot correct an already substituted payment instruction. |
 
-Where a mnemonic passphrase is used, distinguish the mnemonic from the derived binary seed. Under BIP 39, both mnemonic and passphrase determine the seed; a copied derived seed or spending key does not additionally need that passphrase. A wrong passphrase produces another wallet rather than a universal “incorrect password” result. [Mnemonic derivation](https://bips.dev/39/)
+Where a mnemonic passphrase is used, distinguish the mnemonic from the derived binary seed. Under BIP 39, both mnemonic and passphrase determine the seed; a copied derived seed or spending key does not additionally need that passphrase. A wrong passphrase produces another wallet rather than a universal “incorrect password” result. A separately stored passphrase is a second secret required to restore from the mnemonic: the mnemonic alone no longer suffices for theft, and loss of either one defeats that restoration, with no spare unless copies or another recovery path exist. [Mnemonic derivation](https://bips.dev/39/)
 
 ### 2.1 Scenario A — distributed institutional custody
 
@@ -149,6 +149,8 @@ The sole spending policy is 2-of-3. The holder controls two independent keys and
 | **Exit** | Demonstrate spending with both holder keys and retained wallet metadata, without service authentication or access to its servers. |
 
 Verify each signer's actual key in the intended policy and compare the policy and derived address across trusted displays or independently authenticated records. A short fingerprint is an identifier, not sufficient proof of key identity. Registering an incorrect policy preserves the error. [Secure multisig setup](https://bips.dev/129/)
+
+The service's role in recovery also makes it a target for impersonation in both directions: someone posing as the service to the holder, or as the holder to the service. See the Recovery and succession row in §3.
 
 ### 2.3 Scenario C — custody with multiple timed spending paths
 
@@ -218,7 +220,7 @@ The public output policy remains relevant, especially when the aggregate key is 
 
 When the holder has account credentials but no usable signing or unilateral recovery path, assess withdrawal authorization and underlying custody separately. The external controller may use single-signature, multisig, or threshold signing. Those mechanisms do not by themselves give the account holder an exit path.
 
-Require evidence connecting the account entitlement, withdrawal process, and underlying funds. Inspect deposit attribution, withdrawal destination changes, authentication recovery, privileged overrides, and reconciliation. A public address or valid signature is evidence about an output or key; neither alone establishes the completeness of account liabilities or the holder's contractual rights. Those are separate evidence requirements, outside this document's protocol findings.
+Require evidence connecting the account entitlement, withdrawal process, and underlying funds. Inspect deposit attribution, withdrawal destination changes, authentication recovery and its resistance to impersonation (§3), privileged overrides, and reconciliation. A public address or valid signature is evidence about an output or key; neither alone establishes the completeness of account liabilities or the holder's contractual rights. Those are separate evidence requirements, outside this document's protocol findings.
 
 Account-level controls can block withdrawal regardless of the underlying signing arrangement: account suspension, frozen withdrawals, identity-verification holds, withdrawal-address lockouts, or a legal or regulatory hold. Each is a platform freeze in the §1.2 sense. Identify who can impose each control, on what grounds, how it is lifted, and whether the holder has any path that does not pass through the account. Under this configuration, the expected answer to the last question is none.
 
@@ -240,12 +242,13 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 
 | Stage | Questions the review must resolve | Evidence to retain |
 | :---- | :---- | :---- |
-| **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records |
+| **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? If the user supplies entropy, can its use be verified independently of the device or program that consumed it, and what software converts it? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records, entropy procedure and independent verification of its use |
 | **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
 | **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? Where are keys or backups physically gathered for signing, and for how long? | Approval rules, signer verification behavior, transaction records, update authority and firmware history, signing location and exposure window |
+| **Between uses** | What persists on each signer and at each backup location between uses: keys, firmware, configuration, registered policies? Who can reach it, and how would tampering or substitution be detected before the next use? | Inventory of persistent state, access records, tamper-evidence and pre-use verification procedure |
 | **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? | Recovery inventory and a recorded restoration exercise |
 | **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
-| **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? | Every recovery path, successor access procedure, demonstrated spend |
+| **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? Can a successor who did not build the arrangement complete recovery from the retained documentation alone? How are recovery and support requests authenticated, and could someone impersonating the holder, a successor, or the service trigger recovery or obtain material? | Every recovery path, successor access procedure, demonstrated spend, recovery exercise by someone other than the original operator, request-authentication procedure |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
 | **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure and budget, fee-bumping outputs, confirmation and deadline monitoring (§3.1) |
 
@@ -297,6 +300,7 @@ Wallet activity also leaks through transactions and services. Assess each separa
 - **Spend-time policy disclosure.** Spending a P2SH or P2WSH multisig output publishes the complete redeem or witness script, including every public key in it and the threshold. A Taproot script-path spend reveals the executed leaf and its inclusion proof, not the other leaves; a key-path spend reveals no script. A distinctive policy template, such as an uncommon threshold or timelock, can make one wallet's outputs recognizable as a group once spent. [Taproot spending rules](https://bips.dev/341/)
 - **Address reuse.** Receiving more than once to one address links those payments regardless of other measures.
 - **Service-side retention.** Coordinators, signing services, and blockchain-data servers may record network addresses, queried addresses, xpubs, labels, transaction history, and identity linkage. Request what is collected and retained, for how long, and who can be compelled to produce it.
+- **Backup disclosure.** A backup that stores a public-only descriptor or xpub alongside a key discloses the addresses and history it covers to anyone holding that backup, even without spending authority. Storing it aids recovery; encrypting it adds a secret that recovery then depends on. Record what each backup location reveals.
 - **Broadcast origin.** The first relaying node or service can associate a transaction with a network location. Record the broadcast route.
 
 For coercion, assess which signing material and approvals a person can access within the relevant time. A holder-controlled quorum may be geographically separated; a service approval may be obtainable under coercion. Neither ownership label establishes resistance. A delay constrains only paths that actually require it, and a mature fallback may bypass a service review. Record the available paths and practical access procedure rather than assigning a universal ranking.
