@@ -9,7 +9,7 @@
 | **Date** | 6 October 2026 |
 | **Audience** | A new holder choosing among public pitches, and a security reviewer asked to look at one. A new holder can start at §1.3 and §6, and use the glossary in §1.2 for the rest. |
 | **Method** | Same shape as an evidence-based audit: stated claim, scope, artifact that would establish the claim, what public materials typically supply instead. |
-| **Revision** | Replaces the single-standard analogy with an audit posture. Adds a glossary, a summary matrix, a threshold-signature scenario, and a section on privacy and coercion. Corrects the on-chain verification advice and the quorum arithmetic. Still no firm, person, or product names. |
+| **Revision** | Replaces the single-standard analogy with an audit posture. Adds a glossary, a summary matrix, a threshold-signature scenario, and a section on privacy and coercion. Corrects the on-chain verification advice and the quorum arithmetic. Tightens the multisig count, the B and G matrix cells, and the two 2-of-2 cases to match the prose. Still no firm, person, or product names. |
 | **Not this** | Not a vendor review. Not a ranking. Not an allegation. Names are omitted on purpose. A reader who maps a pattern onto a firm has done their own work. |
 
 # **1\. Why this shape**
