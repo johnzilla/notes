@@ -301,7 +301,7 @@ For coercion, assess which signing material and approvals a person can access wi
 | **Only I can authorize spending** | Show that every available spending path requires authority exclusively controlled by me. Identify copies, recovery overrides, and future paths. |
 | **No single party can spend** | Map every authorized key/share combination to controllers, including administrators and backup access. |
 | **The policy is verifiable on-chain** | Supply the complete public policy; independently derive and match the relevant outputs. Separately establish control of the secrets. |
-| **My funds cannot be frozen** | Show a usable path without each dependency being assessed, including required data, software, authentication, and broadcast access. Address signer freeze and platform freeze separately. |
+| **My funds cannot be frozen** | Show a usable path that survives the loss of each dependency in turn, including required data, software, authentication, and broadcast access. Address signer freeze and platform freeze separately. |
 | **Recovery is guaranteed** | Specify the failure being survived, retained artifacts, timing, and an observed recovery result. |
 | **A device verifies everything** | Demonstrate policy authentication, recipient verification, fee checks, and change recognition for the actual script. |
 | **Backups remove the single point of failure** | Identify whether redundancy protects stored recovery material, active signing, or both. |
@@ -363,7 +363,7 @@ Newest first. Each entry links the commit that completed it; the full history is
 
 | Commit | Change |
 | :---- | :---- |
-| This revision | Citation labels now name what each specification defines. Removes the signing-protocol secret-sharing citation from the split-backup scenario; relabels BIP 11, BIP 65, BIP 112, BIP 382, and BIP 383 citations; cites BIP 341 and BIP 340 rather than BIP 342 for key-path cost; notes that RFC 9591's secp256k1 suite is not BIP 340-compatible; names the P2SH redeem script. |
+| This revision | Citation labels now name what each specification defines. Removes the signing-protocol secret-sharing citation from the split-backup scenario; relabels BIP 11, BIP 65, BIP 112, BIP 382, and BIP 383 citations; cites BIP 341 and BIP 340 rather than BIP 342 for key-path cost; notes that RFC 9591's secp256k1 suite is not BIP 340-compatible; names the P2SH redeem script; clarifies the §6 freeze request. |
 | [3c93c6e](https://github.com/johnzilla/notes/commit/3c93c6e) | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
 | [13d110e](https://github.com/johnzilla/notes/commit/13d110e) | Removes the document date. |
 | [254bd1c](https://github.com/johnzilla/notes/commit/254bd1c) | Adds §3.1 on deadlines, fee feasibility, and reorganizations; signing-device and supply-chain review in §1.2 and §3; and transaction- and service-level privacy in §5. |
