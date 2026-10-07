@@ -8,7 +8,7 @@
 | :---- | :---- |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
-| **Revision** | Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
+| **Changes** | See the [changelog](#changelog). |
 | **Scope** | Direct on-chain custody and its signing, backup, and recovery arrangements; a separate section covers payment-channel settlement. This is not a finding about any organization, an incident survey, or an exhaustive assessment of every off-chain protocol. |
 
 ## Contents
@@ -35,6 +35,8 @@
 - [5. Privacy and coercion](#5-privacy-and-coercion)
 - [6. Questions that make a claim reviewable](#6-questions-that-make-a-claim-reviewable)
 - [7. Limits and source use](#7-limits-and-source-use)
+- [8. References](#8-references)
+- [Changelog](#changelog)
 
 ## 1. What the assessment establishes
 
@@ -309,8 +311,65 @@ For coercion, assess which signing material and approvals a person can access wi
 
 ## 7. Limits and source use
 
-The linked public specifications support the mechanisms discussed. Links pinned to a commit identify the version consulted. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
+The linked public specifications support the mechanisms discussed. §8 records the version of each source consulted. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
 
 This review framework does not supply incident likelihoods, legal classifications, insurance interpretations, or conclusions about an unnamed provider. It deliberately leaves implementation and organizational findings unresolved until evidence is inspected. A protocol-valid spend, operational independence, and successful account withdrawal are separate claims.
 
 For each actual assessment, preserve the source version and review date, wallet or protocol version, relevant policy and outputs, and the verification result. Reassess when funds move to a different policy, signing or recovery authority changes, or an implementation changes. An unexamined path remains an unexamined path; a familiar label does not close it.
+
+## 8. References
+
+Each source is listed once with the version consulted and the sections that cite it. Inline links in the text point to the same documents; where an inline link is unpinned, the version below is the one relied on. Specifications establish documented behavior, not deployment conformance (§7).
+
+**Bitcoin Improvement Proposals**, all at [bitcoin/bips commit 927b6de](https://github.com/bitcoin/bips/tree/927b6de9915c9262615a6399de51b200f81e5aa4). Inline links use the bips.dev mirror.
+
+| Reference | Title | Cited in |
+| :---- | :---- | :---- |
+| [BIP 11](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0011.mediawiki) | M-of-N Standard Transactions | §2.9 |
+| [BIP 32](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0032.mediawiki) | Hierarchical Deterministic Wallets | §5 |
+| [BIP 39](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0039.mediawiki) | Mnemonic code for generating deterministic keys | Baseline, §4 |
+| [BIP 48](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0048.mediawiki) | Multi-Script Hierarchy for Multi-Sig Wallets | §2.4 |
+| [BIP 65](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0065.mediawiki) | OP_CHECKLOCKTIMEVERIFY | §2.3, §2.5 |
+| [BIP 67](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0067.mediawiki) | Deterministic Pay-to-script-hash multi-signature addresses through public key sorting | §2.4 |
+| [BIP 68](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0068.mediawiki) | Relative lock-time using consensus-enforced sequence numbers | §2.5, §3.1 |
+| [BIP 112](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0112.mediawiki) | CHECKSEQUENCEVERIFY | §2.3 |
+| [BIP 113](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0113.mediawiki) | Median time-past as endpoint for lock-time calculations | §2.5, §3.1 |
+| [BIP 125](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0125.mediawiki) | Opt-in Full Replace-by-Fee Signaling | §3.1 |
+| [BIP 129](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki) | Bitcoin Secure Multisig Setup (BSMS) | §2.2 |
+| [BIP 174](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0174.mediawiki) | Partially Signed Bitcoin Transaction Format | §3 |
+| [BIP 327](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki) | MuSig2 for BIP340-compatible Multi-Signatures | §2.7 |
+| [BIP 331](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0331.mediawiki) | Ancestor Package Relay | §3.1 |
+| [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §5 |
+| [BIP 342](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0342.mediawiki) | Validation of Taproot Scripts | §4 |
+| [BIP 380](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0380.mediawiki) | Output Script Descriptors General Operation | §1.2 |
+| [BIP 382](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0382.mediawiki) | Segwit Output Script Descriptors | Baseline, §4 |
+| [BIP 383](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0383.mediawiki) | Multisig Output Script Descriptors | §2.1, §4 |
+| [BIP 386](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0386.mediawiki) | tr() Output Script Descriptors | §1.2 |
+| [BIP 388](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0388.mediawiki) | Wallet Policies for Descriptor Wallets | §2.4 |
+| [BIP 431](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0431.mediawiki) | Topology Restrictions for Pinning | §3.1 |
+
+**Other specifications**
+
+| Reference | Title and version | Cited in |
+| :---- | :---- | :---- |
+| [RFC 9591](https://www.rfc-editor.org/rfc/rfc9591.html) | The Flexible Round-Optimized Schnorr Threshold (FROST) Protocol for Two-Round Schnorr Signatures. RFCs are immutable once published. | §2.6, §2.7 |
+| [SLIP-39](https://github.com/satoshilabs/slips/blob/78c87bc63ba1e4479dad7ffd3b18584430d8efb6/slip-0039.md) | Shamir's Secret-Sharing for Mnemonic Codes, at satoshilabs/slips commit 78c87bc | §2.6 |
+| [BOLT 3](https://github.com/lightning/bolts/blob/444805d12ab98c30006173bb190cd9d6fce9e405/03-transactions.md) | Bitcoin Transaction and Script Formats, at lightning/bolts commit 444805d | §2.10 |
+| [Miniscript](https://github.com/sipa/miniscript/blob/6806dfb15a1fafabf7dd28aae3c9d2bc49db01f1/index.html) | Miniscript specification, published at bitcoin.sipa.be/miniscript; source at sipa/miniscript commit 6806dfb | §1.2 |
+
+## Changelog
+
+Newest first. Each entry links the commit that completed it; the full history is in the repository.
+
+| Commit | Change |
+| :---- | :---- |
+| This revision | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
+| [13d110e](https://github.com/johnzilla/notes/commit/13d110e) | Removes the document date. |
+| [254bd1c](https://github.com/johnzilla/notes/commit/254bd1c) | Adds §3.1 on deadlines, fee feasibility, and reorganizations; signing-device and supply-chain review in §1.2 and §3; and transaction- and service-level privacy in §5. |
+| [43a147d](https://github.com/johnzilla/notes/commit/43a147d) | Names split-secret forms and SLIP-39 in §2.6, and FROST and MuSig2 in §2.7. Splits signer freeze from platform freeze, adds account suspension to Scenario H, and renames the §1.3 exit column. |
+| [62f35b5](https://github.com/johnzilla/notes/commit/62f35b5) | Adds contents, unnumbers the baseline so scenario numbers stay stable, standardizes scenario table headers, and pins the BOLT 3 reference. |
+| [63a737c](https://github.com/johnzilla/notes/commit/63a737c) | Rewritten as a threat-model and evidence-review framework for technical reviewers. Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
+| [9a0c177](https://github.com/johnzilla/notes/commit/9a0c177) | Renamed and retitled "What A Bitcoin Custody Pitch Has To Show." |
+| [7b7e48a](https://github.com/johnzilla/notes/commit/7b7e48a) | Corrects the multisig count, tightens two summary-matrix cells, and separates the two 2-of-2 cases. |
+| [2f49d34](https://github.com/johnzilla/notes/commit/2f49d34) | Replaces the single-standard analogy with an audit posture. Adds a glossary, summary matrix, threshold-signature scenario, and privacy and coercion section. |
+| [63fa367](https://github.com/johnzilla/notes/commit/63fa367) | Initial draft: six pitched custody scenarios assessed claim against artifact. |
