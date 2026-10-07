@@ -2,12 +2,12 @@
 
 *Questions to ask about any way of holding it*
 
-A threat-model and evidence-review framework. Configurations, not providers.
+It describes kinds of arrangements, not companies.
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.16 — peer review draft |
-| **Audience** | People choosing how to hold bitcoin: read [Start here](#start-here) and [§6](#6-questions-that-make-a-claim-reviewable). Technical reviewers: read the full document. |
+| **Version** | 0.17 — peer review draft |
+| **Audience** | People choosing how to hold bitcoin: read [Start here](#start-here). Technical reviewers, including anyone who reviews a setup for a holder: read the full document. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
 | **Scope** | Direct on-chain custody and its signing, backup, and recovery arrangements; a separate section covers payment-channel settlement. This is not a finding about any organization, an incident survey, or an exhaustive assessment of every off-chain protocol. |
@@ -55,7 +55,7 @@ This section is for anyone who is deciding how to hold bitcoin. You do not need 
 5. **How do I know the device and software are honest?** A device can show correct information and still leak your keys. Ask for evidence that people reviewed the software. Ask for evidence that the device runs that reviewed software. See [§3](#3-review-the-complete-custody-lifecycle) and [§6](#6-questions-that-make-a-claim-reviewable).
 6. **Who can see what I own?** Some information lets other people see your balance and payments without moving your bitcoin. Ask who has that information and who keeps it. See [§5](#5-privacy-and-coercion).
 
-**How to judge an answer.** A good answer shows you something you can check. Examples are a written list of who holds each key, or a recovery that someone tested. A weak answer repeats the claim in different words. A weak answer does not prove a problem. It shows that the claim is not proved yet. [§6](#6-questions-that-make-a-claim-reviewable) lists more claims and the evidence to ask for.
+**How to judge an answer.** A good answer shows you something you can check. Examples are a written list of who holds each key, or a recovery that someone tested. A weak answer repeats the claim in different words. A weak answer does not prove a problem. It shows that the claim is not proved yet. [§6](#6-questions-that-make-a-claim-reviewable) lists more claims and the evidence to ask for. It is written for technical reviewers. Use it when you talk to a company, or give it to a technical person who reviews a setup for you.
 
 **What this document does not do.** It does not rank products or companies. It does not tell you which arrangement to choose. The right choice depends on what you need protection from. This document helps you see what each arrangement actually does.
 
@@ -63,7 +63,7 @@ This section is for anyone who is deciding how to hold bitcoin. You do not need 
 
 A custody claim needs a defined object: a particular output, wallet, signing policy, recovery arrangement, or account. “Only you can spend” and “no single party can spend” describe different properties. Neither follows from a device count, an approval screen, or a backup count.
 
-This document uses public protocol specifications to establish the behavior of the mechanisms below. The configurations specify who controls the required material; they are not assertions that an unnamed deployment has that allocation. Consequences derived from those configurations are identified as such. No customer wallet, private ceremony record, implementation build, or insurance contract has been inspected.
+This document uses public protocol specifications to establish the behavior of the mechanisms below. The configurations specify who controls the required material; they are not assertions that an unnamed deployment has that allocation. Consequences derived from those configurations are identified as such. No wallet in use by a holder, no private ceremony record, implementation build, or insurance contract has been inspected.
 
 For an actual assessment, identify the assets, authorized actions, participants, trust boundaries, and capabilities being evaluated. Distinguish at least unauthorized spending, refusal or inability to spend, permanent loss of recovery material, transaction misdirection, and disclosure of wallet activity. Record the exact keys, shares, devices, administrators, files, and services accessible to each participant. Physical devices and nominally separate organizations are not automatically independent control domains.
 
@@ -151,7 +151,7 @@ Three institutional controllers each have one key; an on-chain 2-of-3 policy is 
 | Review point | Consequence and evidence requirement |
 | :---- | :---- |
 | **No single institution can spend** | Supported by the allocation only if no institution controls a second key or an alternate path. A descriptor establishes public keys, not their exclusive control. |
-| **Only the holder can authorize movement** | Not enforced by the stated script: two institutional keys suffice. Assess customer authorization as an operational control, including who can override it. |
+| **Only the holder can authorize movement** | Not enforced by the stated script: two institutional keys suffice. Assess the holder's authorization as an operational control, including who can override it. |
 | **One institution can freeze the wallet** | One refusal leaves two signers; two refusals block this path. Shared dependencies can make multiple signers unavailable together. |
 | **The holder can exit independently** | Contradicted by this configuration unless an additional exit mechanism exists. |
 
@@ -193,7 +193,7 @@ The holder controls all three keys. Any two satisfy the stated policy. Distinct 
 
 Metadata includes the actual key ordering or sorting rule and the script wrapper. Published derivation conventions assist interoperability but do not prove that a particular wallet used them. [Multisig derivation](https://bips.dev/48/), [Public-key ordering](https://bips.dev/67/)
 
-The signer must recognize the intended policy and verify that change remains protected by it. Storage alone does not establish this behavior, and a stateless design is not automatically incapable of it. Inspect the actual implementation and user confirmation flow. [Wallet policies](https://bips.dev/388/)
+The signer must recognize the intended policy and verify that change remains protected by it. Storage alone does not establish this behavior, and a stateless design is not automatically incapable of it. Inspect the actual implementation and the holder's confirmation flow. [Wallet policies](https://bips.dev/388/)
 
 ### 2.5 Scenario E — joint signing with delayed unilateral recovery
 
@@ -203,7 +203,7 @@ For relative locks, record the encoded value and type. BIP 68 supports up to 65,
 
 A fresh relative delay applies to new outputs carrying that policy, including change when created. Spending some UTXOs does not reset untouched UTXOs. A transaction need not create change. Determine exit eligibility per output.
 
-Before maturity, service refusal blocks the joint path. After maturity, the holder can use the delayed path if the required key, metadata, and software remain available. The same delayed path is available to an attacker who has compromised that holder key. Provider refusal no longer prevents that spend. Permanent loss of every usable copy of the holder key defeats both stated paths.
+Before maturity, service refusal blocks the joint path. After maturity, the holder can use the delayed path if the required key, metadata, and software remain available. The same delayed path is available to an attacker who has compromised that holder key. Service refusal no longer prevents that spend. Permanent loss of every usable copy of the holder key defeats both stated paths.
 
 The delayed holder path has no deadline of its own: once mature, it stays available. Deadlines arise where a competing path, or a counterparty's spend, is the event to prevent; see §3.1. Track maturity per output on the active chain, since a reorganization can shift it.
 
@@ -231,7 +231,7 @@ Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing
 | :---- | :---- |
 | **No party has unilateral authority** | Map shares, usable backups, dealer-generated material, and recovery access to controllers. Absence of a mnemonic proves none of these properties. |
 | **Policies protect spending** | Identify who enforces each limit or approval, who can change it, and whether another authorized subset bypasses it. |
-| **Provider-independent exit** | Demonstrate an authorized subset signing outside the provider's infrastructure, or a documented recovery/export route. Full-key reconstruction is not inherently required for a withdrawal. |
+| **Service-independent exit** | Demonstrate an authorized subset signing outside the service's infrastructure, or a documented recovery/export route. Full-key reconstruction is not inherently required for a withdrawal. |
 | **Export retires old authority** | Exporting a full key does not invalidate existing shares. Move funds to a new policy to remove the old signing authority over those funds. |
 
 The public output policy remains relevant, especially when the aggregate key is combined with script recovery paths. Record protocol data and derivation information needed for recovery. “One signature on-chain” establishes neither one controller nor the absence of a quorum.
@@ -262,7 +262,7 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 
 | Stage | Questions the review must resolve | Evidence to retain |
 | :---- | :---- | :---- |
-| **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? If the user supplies entropy, can its use be verified independently of the device or program that consumed it, and what software converts it? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records, entropy procedure and independent verification of its use |
+| **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? If the holder supplies entropy, can its use be verified independently of the device or program that consumed it, and what software converts it? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records, entropy procedure and independent verification of its use |
 | **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
 | **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? Where are keys or backups physically gathered for signing, and for how long? | Approval rules, signer verification behavior, transaction records, update authority and firmware history, signing location and exposure window |
 | **Between uses** | What persists on each signer and at each backup location between uses: keys, firmware, configuration, registered policies? Who can reach it, and how would tampering or substitution be detected before the next use? | Inventory of persistent state, access records, tamper-evidence and pre-use verification procedure |
@@ -351,7 +351,7 @@ For coercion, assess which signing material and approvals a person can access wi
 
 The linked public specifications support the mechanisms discussed. §8 records the version of each source consulted. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
 
-This review framework does not supply incident likelihoods, legal classifications, insurance interpretations, or conclusions about an unnamed provider. It deliberately leaves implementation and organizational findings unresolved until evidence is inspected. A protocol-valid spend, operational independence, and successful account withdrawal are separate claims.
+This review framework does not supply incident likelihoods, legal classifications, insurance interpretations, or conclusions about an unnamed service. It deliberately leaves implementation and organizational findings unresolved until evidence is inspected. A protocol-valid spend, operational independence, and successful account withdrawal are separate claims.
 
 For each actual assessment, preserve the source version and review date, wallet or protocol version, relevant policy and outputs, and the verification result. Reassess when funds move to a different policy, signing or recovery authority changes, or an implementation changes. An unexamined path remains an unexamined path; a familiar label does not close it.
 

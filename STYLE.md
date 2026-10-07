@@ -6,7 +6,7 @@ Rules for editing [Who Can Move Your Bitcoin?](what-a-custody-pitch-has-to-show.
 
 The document has two readers.
 
-- **People choosing how to hold bitcoin.** Most are not technical. They read "Start here" and §6.
+- **People choosing how to hold bitcoin.** Most are not technical. They read "Start here."
 - **Technical reviewers.** They read the full document.
 
 Write "Start here" and any plain-language text for the first reader. Write the technical sections for the second reader, and keep them as clear as the content allows.
@@ -43,13 +43,13 @@ These rules follow Simplified Technical English (ASD-STE100) in part. They do no
 | Use | For | Do not use for the same thing |
 | :---- | :---- | :---- |
 | **holder** | The person whose bitcoin is at stake | owner, customer, user (except "account holder" in Scenario H) |
-| **service** | An organization that holds a key, co-signs, runs signing infrastructure, or runs recovery | provider, firm, vendor, company (plain-language text may say "company" once and then "service") |
+| **service** | An organization that holds a key, co-signs, runs signing infrastructure, or runs recovery | provider, firm, vendor (plain-language text says "company" throughout and mentions once that the technical sections call it a "service") |
 | **key** | A private key that authorizes signatures | seed, share, backup (these are different things; see §1.2) |
 | **signer** | The component that uses a key to sign | device, wallet (unless the device itself is meant) |
 | **spending path** | One complete way to satisfy an output's spending conditions | route, branch, leaf (a leaf is a Taproot term; see §1.2) |
 | **freeze** | Signer freeze or platform freeze, as defined in §1.2 | lock, block (unless describing a timelock or a block in the chain) |
 
-Known drift to fix in the next wording pass: Scenario E uses "Provider refusal" once, and Scenario G uses "provider" where the rest of the document says "service."
+A term inside a quoted claim, such as "Multiple vendors or devices" in §6, keeps the claim's wording.
 
 ## Before you push
 
