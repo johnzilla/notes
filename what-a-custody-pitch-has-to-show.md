@@ -37,7 +37,7 @@ Verdicts used below are only these: Established, Partial, Not established, Not a
 
 | Term | Meaning here |
 | :---- | :---- |
-| **Descriptor** | A short text record of the spending rules: which keys, which threshold, which paths, which timelocks. With it, any compatible software can find and spend the coins. Without it, seeds alone may not be enough. Also called "the map" below. |
+| **Descriptor** | A short text record of the spending rules: which keys, which threshold, which paths, which timelocks. With it, compatible software can find the coins and build a spend. Signing still needs the keys. Without it, seeds alone may not be enough. Also called "the map" below. |
 | **Leaf** | One way to spend. A script can have several, each with its own signers and its own timelock. Each leaf is checked on its own. |
 | **Extended public key (xpub)** | The public half of a key, from which every receive address can be derived. Not a spending secret. Anyone holding it can see the balance and history. |
 | **Miniscript** | A structured way to write spending rules with several leaves. More expressive than a plain multisig, and supported by fewer wallets. |
@@ -53,16 +53,16 @@ One row per scenario, plus a baseline for comparison. Each cell is the claim the
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
 | **Baseline: single-sig + passphrase** | Holder (anyone with seed and passphrase) | No one | Yes, widest tooling | No | Device only | One device | None |
 | **A: distributed institutional** | Any 2 of 3 institutions | Any 2 institutions, by refusal | No | Held by the service | Service side | Not applicable, holder does not sign | 2-of-3, holder not in it |
-| **B: collaborative, holder quorum** | Holder alone; or 1 holder key plus firm | No one, while holder has both keys | Yes, with both keys and the configuration file | Yes | Yes, the web application assembles the wallet | Holder devices, varies | 2-of-3, holder holds 2 |
+| **B: collaborative, holder quorum** | Holder alone; or 1 holder key plus firm | No one, while holder has both keys, the configuration file, and a coordinator other than the firm's | Yes, with both keys, the configuration file, and another coordinator | Yes | Yes, the web application assembles the wallet | Holder devices, varies | 2-of-3, holder holds 2 |
 | **C: time-layered joint** | Holder plus firm; later recovery partner plus firm; later holder alone | Firm, until the sovereign leaf matures | After expiry, if other software supports the script | Yes, and coordinator support for it | Yes | Varies | Per leaf |
 | **D: self-directed 2-of-3** | Any 2 of the holder's 3 | No one | Yes | Yes, critical | Yes, the coordinator | Only if devices register the cosigner set | 2-of-3, all holder |
 | **E: decaying 2-of-2** | Holder plus provider; holder alone after the timelock, per coin | Provider, until maturity, restarting on change | After maturity | Recovery data and tool | The provider's application | None, the phone does everything | 2-of-2, decaying to 1 |
 | **F: share-split seed** | Anyone with the device and PIN, or a threshold of shares | No one | Needs an implementation of the share format | No | Device only | One device | None |
-| **G: threshold signature (MPC)** | Per the provider's policy; the chain sees one key | Provider | Depends on key export or recovery | Not applicable | Provider side | The provider's application | None visible |
+| **G: threshold signature (MPC)** | Per the provider's policy; the chain sees one key | Provider, if its share is needed to meet the threshold | Depends on key export or recovery | Not applicable | Provider side | The provider's application | None visible |
 
 # **2\. Seven scenarios, as they are usually pitched**
 
-These are composites of language a new holder will meet. They are not profiles of any company. Several real products mix two of them and market the mix under one name. When that happens, assess each leaf of the script on its own. The brand is not the boundary. Three of the seven are not multisig on-chain. They are included because they are offered in the same sentence as multisig.
+These are composites of language a new holder will meet. They are not profiles of any company. Several real products mix two of them and market the mix under one name. When that happens, assess each leaf of the script on its own. The brand is not the boundary. Two of the seven, F and G, are not multisig on-chain. A through E are, including the decaying 2-of-2. They are included because they are offered in the same sentence as multisig.
 
 ## **2.1 Scenario A — distributed institutional custody**
 
@@ -179,6 +179,7 @@ Module boundary, as pitched. One key on-chain. Several key shares held by severa
 | Claim | Verdict | Why |
 | :---- | :---- | :---- |
 | No single party can move the funds | **Partial** | True of the shares if the protocol and its implementation hold. The chain sees one key and one signature. The threshold is enforced by software, not by consensus. Implementation flaws in threshold-signing libraries are a publicly documented class. The artifact is the protocol specification, an audit of this implementation, and the list of share holders. A descriptor will not help, because the descriptor is single-key. |
+| The provider cannot freeze the holder | **Partial** | Depends on whether the provider's share is needed to meet the threshold. If the holder's shares and a backup party can sign without it, refusal by the provider is not a freeze, though the signing software may still be the provider's. If the provider's share is required, refusal is a freeze until an export or recovery path is used. The artifact is the share map: who holds which share, and which combinations sign. |
 | Policies protect the funds | **Not established** | Limits, approvals, and allowlists are application controls. The chain accepts any valid signature. |
 | The holder can exit without the provider | **Not established** | Depends on a documented key export or recovery that produces a full key outside the provider's software. Where one exists, using it ends the scheme. What comes out is a single-signature wallet. |
 | This is multisig | **Not established** | Same answer as Scenario F, from the other side. F has one key and several backups. G has several shares and one key. Neither is a quorum the chain enforces. |
@@ -217,13 +218,13 @@ The overhead is not neutral. A 2-of-3 with a seed backup per key is six items to
 
 Who holds the extra keys matters more than the count. Two more keys in the holder's other locations raise the theft bar and the loss bar together. Two more keys at service parties raise the collusion surface and can remove the holder quorum. That is arrangement, already the difference between Scenario A and Scenario B. A larger threshold does not convert one into the other.
 
-Verdict. Partial, and only for an operator who already runs a clean 2-of-3, already stores the map away from the seeds, and specifically needs to survive two independent losses. For everyone else it is more management on the same module. The failures that take funds are not the ones the extra keys touch. A 2-of-2 is the other direction: either share lost is a freeze until a timelock, or forever, and it should not be sold as the safer small quorum.
+Verdict. Partial, and only for an operator who already runs a clean 2-of-3, already stores the map away from the seeds, and specifically needs to survive two independent losses. For everyone else it is more management on the same module. The failures that take funds are not the ones the extra keys touch. A 2-of-2 is the other direction, and it should not be sold as the safer small quorum. A plain 2-of-2 with no timelock is lost forever if either key is lost. Scenario E softens one side only: a lost provider key is a freeze until maturity, and a lost holder key is still forever.
 
 # **5\. Two things the pitches leave out**
 
-Privacy. Any party holding the extended public keys or the configuration file can derive every address, and with it the balance and history. That includes the firm in B and C, the institutions in A, the provider in E and G, and any hosted service a coordinator in D talks to. It is not a spend risk. It is a targeting risk, and for many holders the likelier one. Ask who holds the public keys after setup, and for how long.
+Privacy. Any party holding the extended public keys or the configuration file can derive every address, and with it the balance and history. That includes the firm in B and C, the institutions in A, and the provider in E and G. In D, a server the coordinator queries usually sees the addresses it was asked about, and sees the extended public keys only if the coordinator sent them. That is a narrower finding, and still a targeting finding. None of this is a spend risk. It is a targeting risk, and for many holders the likelier one. Ask who holds the public keys after setup, and for how long.
 
-Coercion. A holder-held quorum is a strength against a firm and a weakness against a person standing in the holder's kitchen. Whatever the holder can do alone, the holder can be made to do. A co-signer that applies a delay or a review, or a timelock nobody can shorten, is a real control against that attack. It is the same control that makes A, C, E, and G able to freeze. Score it in both directions. The scenarios are not ranked, because the threat a given holder faces decides which side of that trade matters.
+Coercion. A holder-held quorum is a strength against a firm and a weakness against a person standing in the holder's kitchen. Whatever the holder can do alone, the holder can be made to do. A co-signer that applies a delay or a review, or a timelock nobody can shorten, is a real control against that attack. It is the same control that makes A, C, and E able to freeze, and G where the provider's share is required. Score it in both directions. The scenarios are not ranked, because the threat a given holder faces decides which side of that trade matters.
 
 # **6\. What a pleb can do with this**
 
