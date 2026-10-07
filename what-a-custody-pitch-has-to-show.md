@@ -1,4 +1,4 @@
-**CONFORMANCE NOTE  ·  PUBLIC SCENARIOS**
+**NOTE  ·  PUBLIC SCENARIOS**
 
 **What A Bitcoin Custody Pitch Has To Show**
 
