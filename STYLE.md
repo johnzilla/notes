@@ -1,6 +1,6 @@
 # Style guide
 
-Rules for editing [Who Can Move Your Bitcoin?](what-a-custody-pitch-has-to-show.md). They apply to every change, by any author. Check a change against this page before you commit it.
+Rules for editing [Who Can Move Your Bitcoin?](who-can-move-your-bitcoin.md). They apply to every change, by any author. Check a change against this page before you commit it.
 
 ## Readers
 
@@ -25,7 +25,7 @@ Write "Start here" and any plain-language text for the first reader. Write the t
 1. **Do not renumber.** Existing section and scenario numbers stay fixed, because reviewers cite them. Add new material inside an existing section, at the end of a list, or under an unnumbered heading.
 2. **Version every change.** Change the minor number when a claim, consequence, citation, or reader-facing text changes. Change the major number when numbering or structure changes in a way that breaks references. Typo-only edits do not change the version.
 3. **Record every version.** Add a changelog row that links the content commit. Tag the commit that contains the changelog row as `vX.Y`. Update the version line in the README.
-4. **Keep the filename.** The title can change. The filename stays, so links and tags keep working.
+4. **Keep the filename.** The filename is `who-can-move-your-bitcoin.md`. It stays fixed, so links keep working. Versions before 0.18 used `what-a-custody-pitch-has-to-show.md`; their tags keep that name, and a short file at that path links to the current one.
 
 ## Plain language
 

@@ -4,9 +4,9 @@
 
 It describes kinds of arrangements, not companies.
 
-| Document | what-a-custody-pitch-has-to-show.md |
+| Document | who-can-move-your-bitcoin.md |
 | :---- | :---- |
-| **Version** | 0.17 — peer review draft |
+| **Version** | 0.18 — peer review draft |
 | **Audience** | People choosing how to hold bitcoin: read [Start here](#start-here). Technical reviewers, including anyone who reviews a setup for a holder: read the full document. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
