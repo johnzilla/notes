@@ -6,7 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.14 — peer review draft |
+| **Version** | 0.15 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -247,7 +247,7 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 | **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? Where are keys or backups physically gathered for signing, and for how long? | Approval rules, signer verification behavior, transaction records, update authority and firmware history, signing location and exposure window |
 | **Between uses** | What persists on each signer and at each backup location between uses: keys, firmware, configuration, registered policies? Who can reach it, and how would tampering or substitution be detected before the next use? | Inventory of persistent state, access records, tamper-evidence and pre-use verification procedure |
 | **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? Was each backup read back as stored, so that transcription and media errors would surface? When does each storage medium need refreshing? | Recovery inventory, a recorded restoration exercise, read-back records, and media refresh schedule |
-| **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
+| **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure, monitoring for unauthorized spends |
 | **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? Can a successor who did not build the arrangement complete recovery from the retained documentation alone? How are recovery and support requests authenticated, and could someone impersonating the holder, a successor, or the service trigger recovery or obtain material? | Every recovery path, successor access procedure, demonstrated spend, recovery exercise by someone other than the original operator, request-authentication procedure |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
 | **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure and budget, fee-bumping outputs, confirmation and deadline monitoring (§3.1) |
@@ -275,7 +275,7 @@ For a plain t-of-n policy with distinct keys, no alternate spending route, and a
 - A spend requires valid signatures from t distinct keys. An attacker may obtain these through key compromise or by inducing authorized signers to sign an unauthorized transaction.
 - Up to n−t unavailable keys leave a signing quorum.
 - Withholding n−t+1 keys prevents that path from being satisfied.
-- If an adversary obtains a signing set of t keys, the holder can compete to move the funds only if at least t other usable keys remain (n−t ≥ t). The outcome is then a broadcast race (§3.1).
+- If an adversary obtains a signing set of t keys, the holder can compete to move the funds only if at least t other usable keys remain (n−t ≥ t), and only if the theft is detected before the adversary's spend confirms. The outcome is then a broadcast race (§3.1).
 
 These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Neither leaves a counter-sweep after theft of a signing set, since one and two keys remain; that requires n ≥ 2t, as in 2-of-4 or 3-of-6. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
 
