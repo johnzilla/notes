@@ -78,7 +78,7 @@ The scenario tables below state **protocol consequences and evidence requirement
 | **Descriptor** | A structured description of output scripts and keys, including derivation information where applicable. Descriptors can contain private keys. “Public-only descriptor” below excludes them. |
 | **Miniscript** | A structured subset of Script supporting analysis and construction of spending conditions; it is not synonymous with a Taproot tree. |
 | **Coordinator** | The role that assembles wallet information and transactions. Whether the same application also signs is an implementation fact. |
-| **Freeze** | In scenario tables, prevention of spending by withholding required signer cooperation. This does not cover every source of unavailability. |
+| **Freeze** | Two variants. *Signer freeze*: prevention of spending by withholding required signer cooperation. *Platform freeze*: suspension of an account or service workflow, such as withdrawals, authentication, or signing requests, regardless of any signer's willingness. Scenario tables mean signer freeze unless they say otherwise. Neither covers every source of unavailability. |
 | **Loss versus compromise** | Loss removes legitimate access. Compromise gives an adversary access. A missing backup may be both; assess the consequences separately. |
 
 These distinctions follow the descriptor, Miniscript, and Taproot specifications. [Descriptor format](https://bips.dev/380/), [Miniscript specification](https://bitcoin.sipa.be/miniscript/), [Taproot spending rules](https://bips.dev/341/)
@@ -89,7 +89,7 @@ For Taproot, inspect both the internal-key construction and the complete intende
 
 Custody authority, signing mechanism, backup method, and recovery policy are separate dimensions. A split backup can protect one key of a multisig wallet. A threshold protocol can implement a signing key within a larger script. Device isolation and online exposure are further implementation choices.
 
-| Configuration | Spending authority under the stated configuration | Service-independent exit |
+| Configuration | Spending authority under the stated configuration | Unilateral holder exit, with retained material |
 | :---- | :---- | :---- |
 | **Baseline: holder single-signature** | The holder's signing key, including any usable copies | With key material, wallet metadata, and usable software |
 | **A: distributed institutional 2-of-3** | Any two institutional keys | None provided to the holder |
@@ -182,7 +182,9 @@ Do not infer display independence from this policy. Assess whether signing and t
 
 ### 2.6 Scenario F — split backup of a single-signature secret
 
-This is a backup method. In the configuration assessed here, restoration reconstructs a secret used by one signer; the backup threshold is not a consensus signing threshold. Threshold secret sharing and threshold signing are distinct operations. [Secret-sharing construction, Appendix C](https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C)
+This is a backup method. Record which secret form is split: a mnemonic, the binary seed derived from it, an extended private key, or a raw private key. Each restores a different scope and carries different passphrase and derivation requirements. A split mnemonic still needs any mnemonic passphrase; a split derived seed does not; a split extended private key restores only its subtree; a split raw key restores one key. In the configuration assessed here, restoration yields material from which one signer derives its key. The backup threshold is not a consensus signing threshold. Threshold secret sharing and threshold signing are distinct operations. [Secret-sharing construction, Appendix C](https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C)
+
+SLIP-39 is a published share format for this purpose. It splits a master secret into mnemonic shares, supports two-level group thresholds, and applies its own passphrase encryption, under which every passphrase yields a valid but different wallet. It is not a share encoding of a BIP 39 mnemonic. Converting an existing BIP 39 wallet requires splitting the 512-bit derived seed, which produces longer shares and carries over only one mnemonic-and-passphrase combination; the specification instead recommends moving funds to a new SLIP-39 wallet. Record which share format is in use and which recovery software implements it. [SLIP-39 at commit 78c87bc](https://github.com/satoshilabs/slips/blob/78c87bc63ba1e4479dad7ffd3b18584430d8efb6/slip-0039.md)
 
 For a simple t-of-n backup, losing one share preserves recoverability when n−1 is at least t. A threshold above one is not required for loss tolerance. Separately, compromise of sufficient shares can expose the restored secret, subject to any additional protection. Compromise of the active signer can bypass the need to obtain backup shares.
 
@@ -192,9 +194,9 @@ Apply this backup assessment separately to each protected key when shares are us
 
 ### 2.7 Scenario G — threshold or aggregate signing
 
-A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count. This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification](https://www.rfc-editor.org/rfc/rfc9591.html)
+A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count. This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification (FROST, RFC 9591)](https://www.rfc-editor.org/rfc/rfc9591.html)
 
-Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants. Verify the actual protocol and access structure. [Aggregate multisignature specification](https://bips.dev/327/)
+Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants: MuSig2 is an n-of-n scheme, while FROST supports t-of-n. Verify the actual protocol and access structure. [Aggregate multisignature specification (MuSig2, BIP 327)](https://bips.dev/327/)
 
 | Review point | Consequence and evidence requirement |
 | :---- | :---- |
@@ -210,6 +212,8 @@ The public output policy remains relevant, especially when the aggregate key is 
 When the holder has account credentials but no usable signing or unilateral recovery path, assess withdrawal authorization and underlying custody separately. The external controller may use single-signature, multisig, or threshold signing. Those mechanisms do not by themselves give the account holder an exit path.
 
 Require evidence connecting the account entitlement, withdrawal process, and underlying funds. Inspect deposit attribution, withdrawal destination changes, authentication recovery, privileged overrides, and reconciliation. A public address or valid signature is evidence about an output or key; neither alone establishes the completeness of account liabilities or the holder's contractual rights. Those are separate evidence requirements, outside this document's protocol findings.
+
+Account-level controls can block withdrawal regardless of the underlying signing arrangement: account suspension, frozen withdrawals, identity-verification holds, withdrawal-address lockouts, or a legal or regulatory hold. Each is a platform freeze in the §1.2 sense. Identify who can impose each control, on what grounds, how it is lifted, and whether the holder has any path that does not pass through the account. Under this configuration, the expected answer to the last question is none.
 
 ### 2.9 Scenario I — escrow and shared control
 
@@ -271,7 +275,7 @@ For coercion, assess which signing material and approvals a person can access wi
 | **Only I can authorize spending** | Show that every available spending path requires authority exclusively controlled by me. Identify copies, recovery overrides, and future paths. |
 | **No single party can spend** | Map every authorized key/share combination to controllers, including administrators and backup access. |
 | **The policy is verifiable on-chain** | Supply the complete public policy; independently derive and match the relevant outputs. Separately establish control of the secrets. |
-| **My funds cannot be frozen** | Show a usable path without each dependency being assessed, including required data, software, authentication, and broadcast access. |
+| **My funds cannot be frozen** | Show a usable path without each dependency being assessed, including required data, software, authentication, and broadcast access. Address signer freeze and platform freeze separately. |
 | **Recovery is guaranteed** | Specify the failure being survived, retained artifacts, timing, and an observed recovery result. |
 | **A device verifies everything** | Demonstrate policy authentication, recipient verification, fee checks, and change recognition for the actual script. |
 | **Backups remove the single point of failure** | Identify whether redundancy protects stored recovery material, active signing, or both. |
