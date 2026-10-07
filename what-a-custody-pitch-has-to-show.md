@@ -31,6 +31,7 @@
   - [2.9 Scenario I — escrow and shared control](#29-scenario-i--escrow-and-shared-control)
   - [2.10 Payment channels and other off-chain arrangements](#210-payment-channels-and-other-off-chain-arrangements)
 - [3. Review the complete custody lifecycle](#3-review-the-complete-custody-lifecycle)
+  - [3.1 Deadlines, fees, and reorganizations](#31-deadlines-fees-and-reorganizations)
 - [4. Independence, quorum size, and shared failures](#4-independence-quorum-size-and-shared-failures)
 - [5. Privacy and coercion](#5-privacy-and-coercion)
 - [6. Questions that make a claim reviewable](#6-questions-that-make-a-claim-reviewable)
@@ -178,6 +179,8 @@ A fresh relative delay applies to new outputs carrying that policy, including ch
 
 Before maturity, service refusal blocks the joint path. After maturity, the holder can use the delayed path if the required key, metadata, and software remain available. The same delayed path is available to an attacker who has compromised that holder key. Provider refusal no longer prevents that spend. Permanent loss of every usable copy of the holder key defeats both stated paths.
 
+The delayed holder path has no deadline of its own: once mature, it stays available. Deadlines arise where a competing path, or a counterparty's spend, is the event to prevent; see §3.1. Track maturity per output on the active chain, since a reorganization can shift it.
+
 Do not infer display independence from this policy. Assess whether signing and transaction presentation share a compromised component, and what independent verification exists.
 
 ### 2.6 Scenario F — split backup of a single-signature secret
@@ -240,9 +243,19 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 | **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
 | **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? | Every recovery path, successor access procedure, demonstrated spend |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
-| **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure, confirmation and deadline monitoring |
+| **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure and budget, fee-bumping outputs, confirmation and deadline monitoring (§3.1) |
 
 Transaction interchange data can carry scripts, derivation information, partial signatures, and signing constraints. Verify the actual transaction and signature-hash behavior rather than treating an approval action as proof of what was authorized. Retain required pre-signed recovery transactions as recovery artifacts, with their covered outputs and restrictions. [Partially signed transaction format](https://bips.dev/174/)
+
+### 3.1 Deadlines, fees, and reorganizations
+
+Minimum-time conditions open paths; they do not close them. A delayed path therefore creates a deadline only when another path's maturity, or a protocol's response window, is the event to be prevented. Examples in this document: moving funds before a recovery path the holder no longer wants becomes eligible (Scenario C), responding to a revoked channel state within its delay (§2.10), and any pre-signed transaction that must confirm before a competing spend. For each deadline, record the triggering height or time, the transaction that must confirm before it, and who must act.
+
+Feasibility depends on confirming at a feerate that is not known in advance. A pre-signed transaction commits to its fee when signed. Raising it later requires either a replacement signed by the required keys or a child transaction spending an output the acting party can sign. Record which outputs support fee bumping, which keys a replacement needs, and a fee budget set before the deadline approaches. If the only bumping route requires the counterparty whose action the deadline guards against, the fee plan depends on that counterparty.
+
+Replacement, package acceptance, and the limits that make pinning possible are node relay policy, not consensus. A party able to spend an output of a pending transaction can sometimes attach transactions that make a replacement or child uneconomic or unrelayable under that policy. Policy differs across implementations and versions. Record the policy the procedure relies on and an alternative broadcast route. [Opt-in replacement signaling](https://bips.dev/125/), [Ancestor package relay](https://bips.dev/331/), [Topology restrictions for pinning](https://bips.dev/431/)
+
+A chain reorganization can move or remove the confirmation of the transaction that created an output. A relative lock counts from that output's confirmation on the active chain, so maturity can arrive later than computed, and a spend valid at the old tip may be non-final at the new one. Time-based locks use the active chain's median-time-past. Monitor from before maturity, re-evaluate eligibility after a reorganization, and do not treat a single confirmation of the creating transaction, or of a deadline-sensitive spend, as final. [Relative-lock encoding](https://bips.dev/68/), [Lock-time clock](https://bips.dev/113/)
 
 ## 4. Independence, quorum size, and shared failures
 
