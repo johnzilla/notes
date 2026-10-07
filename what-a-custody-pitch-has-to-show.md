@@ -12,6 +12,30 @@
 | **Revision** | Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
 | **Scope** | Direct on-chain custody and its signing, backup, and recovery arrangements; a separate section covers payment-channel settlement. This is not a finding about any organization, an incident survey, or an exhaustive assessment of every off-chain protocol. |
 
+## Contents
+
+- [1. What the assessment establishes](#1-what-the-assessment-establishes)
+  - [1.1 Evidence and verdicts](#11-evidence-and-verdicts)
+  - [1.2 Terms and boundaries](#12-terms-and-boundaries)
+  - [1.3 Coverage by dimension](#13-coverage-by-dimension)
+- [2. Configuration assessments](#2-configuration-assessments)
+  - [Baseline — holder-controlled single-signature custody](#baseline--holder-controlled-single-signature-custody)
+  - [2.1 Scenario A — distributed institutional custody](#21-scenario-a--distributed-institutional-custody)
+  - [2.2 Scenario B — collaborative custody with a holder quorum](#22-scenario-b--collaborative-custody-with-a-holder-quorum)
+  - [2.3 Scenario C — custody with multiple timed spending paths](#23-scenario-c--custody-with-multiple-timed-spending-paths)
+  - [2.4 Scenario D — holder-controlled 2-of-3](#24-scenario-d--holder-controlled-2-of-3)
+  - [2.5 Scenario E — joint signing with delayed unilateral recovery](#25-scenario-e--joint-signing-with-delayed-unilateral-recovery)
+  - [2.6 Scenario F — split backup of a single-signature secret](#26-scenario-f--split-backup-of-a-single-signature-secret)
+  - [2.7 Scenario G — threshold or aggregate signing](#27-scenario-g--threshold-or-aggregate-signing)
+  - [2.8 Scenario H — an account with external spending authority](#28-scenario-h--an-account-with-external-spending-authority)
+  - [2.9 Scenario I — escrow and shared control](#29-scenario-i--escrow-and-shared-control)
+  - [2.10 Payment channels and other off-chain arrangements](#210-payment-channels-and-other-off-chain-arrangements)
+- [3. Review the complete custody lifecycle](#3-review-the-complete-custody-lifecycle)
+- [4. Independence, quorum size, and shared failures](#4-independence-quorum-size-and-shared-failures)
+- [5. Privacy and coercion](#5-privacy-and-coercion)
+- [6. Questions that make a claim reviewable](#6-questions-that-make-a-claim-reviewable)
+- [7. Limits and source use](#7-limits-and-source-use)
+
 ## 1. What the assessment establishes
 
 A custody claim needs a defined object: a particular output, wallet, signing policy, recovery arrangement, or account. “Only you can spend” and “no single party can spend” describe different properties. Neither follows from a device count, an approval screen, or a backup count.
@@ -82,11 +106,11 @@ These rows describe authorization, not relative safety. Sections 3–6 supply th
 
 ## 2. Configuration assessments
 
-### 2.0 Baseline — holder-controlled single-signature custody
+### Baseline — holder-controlled single-signature custody
 
 One key authorizes spending. Online software, an isolated signing device, and an offline signing process can all implement this authority arrangement; their exposure and verification procedures need separate examination. Single-signature descriptors exist and identify the script and derivation needed to locate funds. [Single-key output descriptors](https://bips.dev/382/)
 
-| Property | Consequence and evidence requirement |
+| Review point | Consequence and evidence requirement |
 | :---- | :---- |
 | **Unauthorized spending** | A usable copy of the relevant private key is sufficient. Enumerate the active signer, backups, exports, and restore environments. |
 | **Availability** | No external cosigner is required by this configuration. That does not establish independence from a particular application or recovery service. Demonstrate another usable spend workflow. |
@@ -99,7 +123,7 @@ Where a mnemonic passphrase is used, distinguish the mnemonic from the derived b
 
 Three institutional controllers each have one key; an on-chain 2-of-3 policy is the only spending path. The holder has no signing key. The following consequences are deductions from that allocation and the specified multisig threshold. [Multisig descriptors](https://bips.dev/383/)
 
-| Claim | Consequence and evidence requirement |
+| Review point | Consequence and evidence requirement |
 | :---- | :---- |
 | **No single institution can spend** | Supported by the allocation only if no institution controls a second key or an alternate path. A descriptor establishes public keys, not their exclusive control. |
 | **Only the holder can authorize movement** | Not enforced by the stated script: two institutional keys suffice. Assess customer authorization as an operational control, including who can override it. |
@@ -172,7 +196,7 @@ A threshold-signature protocol allows an authorized subset of share holders to g
 
 Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants. Verify the actual protocol and access structure. [Aggregate multisignature specification](https://bips.dev/327/)
 
-| Review point | Required evidence |
+| Review point | Consequence and evidence requirement |
 | :---- | :---- |
 | **No party has unilateral authority** | Map shares, usable backups, dealer-generated material, and recovery access to controllers. Absence of a mnemonic proves none of these properties. |
 | **Policies protect spending** | Identify who enforces each limit or approval, who can change it, and whether another authorized subset bypasses it. |
@@ -195,7 +219,7 @@ Assess agreement and destination verification, signer identity, dispute authoriz
 
 ### 2.10 Payment channels and other off-chain arrangements
 
-A funding-output descriptor alone is insufficient for a payment channel. For the commitment-and-revocation protocol referenced here, review the current enforceable state, retained signatures, revocation material, unilateral-close transactions, delayed outputs, pending conditional payments, and the ability to monitor and respond before applicable deadlines. An old state backup is not interchangeable with a current state. Settlement may require several on-chain transactions and adequate fees. These requirements follow the documented commitment and settlement structure. [Channel transaction specification](https://github.com/lightning/bolts/blob/master/03-transactions.md)
+A funding-output descriptor alone is insufficient for a payment channel. For the commitment-and-revocation protocol referenced here, review the current enforceable state, retained signatures, revocation material, unilateral-close transactions, delayed outputs, pending conditional payments, and the ability to monitor and respond before applicable deadlines. An old state backup is not interchangeable with a current state. Settlement may require several on-chain transactions and adequate fees. These requirements follow the documented commitment and settlement structure. [Channel transaction specification, BOLT 3 at commit 444805d](https://github.com/lightning/bolts/blob/444805d12ab98c30006173bb190cd9d6fce9e405/03-transactions.md)
 
 For other off-chain arrangements, identify the exact published protocol before assigning findings. Record what the holder owns or controls, who controls the backing outputs, and every dependency of redemption. Do not transfer the conclusions of an on-chain multisig row to an unexamined off-chain design.
 
