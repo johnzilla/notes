@@ -282,6 +282,15 @@ An xpub exposes non-hardened descendant public keys in its subtree. It does not 
 
 Public data alone does not authorize spending. However, a parent xpub combined with a corresponding non-hardened descendant private key can expose the parent private key. Treat this documented compound failure separately from privacy loss and from compromise of a full wallet quorum. [Extended-key security implications](https://bips.dev/32/)
 
+Wallet activity also leaks through transactions and services. Assess each separately:
+
+- **Input clustering.** Spending several outputs in one transaction links them under the common assumption that one entity controls all inputs. Record the coin-selection behavior and whether the holder can control it.
+- **Change identification.** Change can often be distinguished by script type, amount precision, or output ordering. Change returned under a distinctive policy can be linked to the wallet when later spent. Record how change is constructed.
+- **Spend-time policy disclosure.** Spending a script-based multisig output publishes the complete witness script, including every public key in it and the threshold. A Taproot script-path spend reveals the executed leaf and its inclusion proof, not the other leaves; a key-path spend reveals no script. A distinctive policy template, such as an uncommon threshold or timelock, can make one wallet's outputs recognizable as a group once spent. [Taproot spending rules](https://bips.dev/341/)
+- **Address reuse.** Receiving more than once to one address links those payments regardless of other measures.
+- **Service-side retention.** Coordinators, signing services, and blockchain-data servers may record network addresses, queried addresses, xpubs, labels, transaction history, and identity linkage. Request what is collected and retained, for how long, and who can be compelled to produce it.
+- **Broadcast origin.** The first relaying node or service can associate a transaction with a network location. Record the broadcast route.
+
 For coercion, assess which signing material and approvals a person can access within the relevant time. A holder-controlled quorum may be geographically separated; a service approval may be obtainable under coercion. Neither ownership label establishes resistance. A delay constrains only paths that actually require it, and a mature fallback may bypass a service review. Record the available paths and practical access procedure rather than assigning a universal ranking.
 
 ## 6. Questions that make a claim reviewable
