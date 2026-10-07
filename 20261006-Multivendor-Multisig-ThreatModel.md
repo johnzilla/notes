@@ -4,7 +4,7 @@
 
 *A claim-versus-artifact note. Patterns, not providers. No finding in this document is a statement about any firm's intent, solvency, or character.*
 
-| Document | CN-BTC-SCENARIOS-2026-10-06 |
+| Document | 20261006-Multivendor-Multisig-ThreatModel.md |
 | :---- | :---- |
 | **Date** | 6 October 2026 |
 | **Audience** | A new holder choosing among public pitches, and a security reviewer asked to look at one. |
