@@ -259,4 +259,4 @@ A firm that answers with the artifact has supplied what the claim needs. A firm 
 
 * Nothing here alleges an incident, a theft, a false statement made knowingly, or an inability to pay a claim. "Not established" means the artifact was not in the pitch.
 
-*End of note. The verdicts are replaceable. The artifact column is the part to keep.*
+
