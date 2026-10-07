@@ -79,6 +79,7 @@ The scenario tables below state **protocol consequences and evidence requirement
 | **Descriptor** | A structured description of output scripts and keys, including derivation information where applicable. Descriptors can contain private keys. “Public-only descriptor” below excludes them. |
 | **Miniscript** | A structured subset of Script supporting analysis and construction of spending conditions; it is not synonymous with a Taproot tree. |
 | **Coordinator** | The role that assembles wallet information and transactions. Whether the same application also signs is an implementation fact. |
+| **Signing device and supply chain** | The signer's hardware, firmware, and software, and the route by which each reaches it: procurement, delivery, initialization, update authority, and build provenance. A genuine device running substituted firmware, or a remote signing service, is a different signer for review purposes. |
 | **Freeze** | Two variants. *Signer freeze*: prevention of spending by withholding required signer cooperation. *Platform freeze*: suspension of an account or service workflow, such as withdrawals, authentication, or signing requests, regardless of any signer's willingness. Scenario tables mean signer freeze unless they say otherwise. Neither covers every source of unavailability. |
 | **Loss versus compromise** | Loss removes legitimate access. Compromise gives an adversary access. A missing backup may be both; assess the consequences separately. |
 
@@ -236,14 +237,16 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 
 | Stage | Questions the review must resolve | Evidence to retain |
 | :---- | :---- | :---- |
-| **Creation** | Who generates each secret? Who can copy, export, replace, or restore it? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions |
+| **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records |
 | **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
-| **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? | Approval rules, signer verification behavior, transaction records |
+| **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? | Approval rules, signer verification behavior, transaction records, update authority and firmware history |
 | **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? | Recovery inventory and a recorded restoration exercise |
 | **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
 | **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? | Every recovery path, successor access procedure, demonstrated spend |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
 | **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure and budget, fee-bumping outputs, confirmation and deadline monitoring (§3.1) |
+
+A signer's verification behavior is only as trustworthy as the code performing it. Establish how firmware and signing software are authenticated before first use and at each update, who holds update-signing authority, and whether the build can be reproduced from published source. Where signing occurs in a remote or coordinated service, treat that service's operator, infrastructure, and administrators as control points in the authority map. Device diversity limits a defect to the devices sharing it; it does not authenticate any one device (§4).
 
 Transaction interchange data can carry scripts, derivation information, partial signatures, and signing constraints. Verify the actual transaction and signature-hash behavior rather than treating an approval action as proof of what was authorized. Retain required pre-signed recovery transactions as recovery artifacts, with their covered outputs and restrictions. [Partially signed transaction format](https://bips.dev/174/)
 
