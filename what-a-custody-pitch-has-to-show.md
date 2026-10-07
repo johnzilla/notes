@@ -1,19 +1,20 @@
-**NOTE · PUBLIC CUSTODY WORKFLOWS**
+# Who Can Move Your Bitcoin?
 
-# What A Bitcoin Custody Pitch Has To Show
+*Questions to ask about any way of holding it*
 
-*A threat-model and evidence-review framework. Configurations, not providers.*
+A threat-model and evidence-review framework. Configurations, not providers.
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.15 — peer review draft |
-| **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
+| **Version** | 0.16 — peer review draft |
+| **Audience** | People choosing how to hold bitcoin: read [Start here](#start-here) and [§6](#6-questions-that-make-a-claim-reviewable). Technical reviewers: read the full document. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
 | **Scope** | Direct on-chain custody and its signing, backup, and recovery arrangements; a separate section covers payment-channel settlement. This is not a finding about any organization, an incident survey, or an exhaustive assessment of every off-chain protocol. |
 
 ## Contents
 
+- [Start here](#start-here)
 - [1. What the assessment establishes](#1-what-the-assessment-establishes)
   - [1.1 Evidence and verdicts](#11-evidence-and-verdicts)
   - [1.2 Terms and boundaries](#12-terms-and-boundaries)
@@ -38,6 +39,25 @@
 - [7. Limits and source use](#7-limits-and-source-use)
 - [8. References](#8-references)
 - [Changelog](#changelog)
+
+## Start here
+
+This section is for anyone who is deciding how to hold bitcoin. You do not need technical knowledge to use it. The rest of the document is a technical reference. It gives the detail behind each question below.
+
+**What "custody" means.** Secret numbers called keys control bitcoin. A person or a machine that can use the right keys can move the bitcoin. Custody is the arrangement that decides who holds the keys, where they are kept, and what happens when something goes wrong. In some arrangements, you hold every key. In others, you share keys with a company, which the technical sections call a "service." In others, a company holds everything for you. Each arrangement can fail in different ways. No arrangement is safe only because of its name or its number of keys.
+
+**The questions that matter most.** Ask these questions about any way of holding bitcoin. Ask them about a setup you build yourself too.
+
+1. **Who can move my bitcoin?** List every person, company, and device that can move it, alone or together. Include backups, recovery services, and options that open only after a waiting period. "Only you can move it" is a claim to check, not a fact to accept. See [§2](#2-configuration-assessments) and [§6](#6-questions-that-make-a-claim-reviewable).
+2. **Who can stop me from moving it?** A company can refuse to sign or can freeze an account. Software can stop working or stop getting updates. For each of these, ask what you can still do. See [§1.2](#12-terms-and-boundaries) and [§2.8](#28-scenario-h--an-account-with-external-spending-authority).
+3. **What happens if I lose something?** You can lose a key, a backup, a password, a device, or a setup file. Ask which losses you can recover from. Ask what you must keep to recover. Ask another person to test the recovery with only your written notes. See [§2](#2-configuration-assessments) and [§3](#3-review-the-complete-custody-lifecycle).
+4. **What happens if someone steals something?** A thief can take a device, a backup, or a password. Ask how much a thief must take before they can move your bitcoin. Ask whether you can move it first, and how you would find out in time. See [§4](#4-independence-quorum-size-and-shared-failures).
+5. **How do I know the device and software are honest?** A device can show correct information and still leak your keys. Ask for evidence that people reviewed the software. Ask for evidence that the device runs that reviewed software. See [§3](#3-review-the-complete-custody-lifecycle) and [§6](#6-questions-that-make-a-claim-reviewable).
+6. **Who can see what I own?** Some information lets other people see your balance and payments without moving your bitcoin. Ask who has that information and who keeps it. See [§5](#5-privacy-and-coercion).
+
+**How to judge an answer.** A good answer shows you something you can check. Examples are a written list of who holds each key, or a recovery that someone tested. A weak answer repeats the claim in different words. A weak answer does not prove a problem. It shows that the claim is not proved yet. [§6](#6-questions-that-make-a-claim-reviewable) lists more claims and the evidence to ask for.
+
+**What this document does not do.** It does not rank products or companies. It does not tell you which arrangement to choose. The right choice depends on what you need protection from. This document helps you see what each arrangement actually does.
 
 ## 1. What the assessment establishes
 
@@ -382,6 +402,7 @@ Newest first. Each version links to its tagged text, which stays fixed after lat
 
 | Version | Commit | Change |
 | :---- | :---- | :---- |
+| [0.16](https://github.com/johnzilla/notes/blob/v0.16/what-a-custody-pitch-has-to-show.md) | [v0.15…v0.16](https://github.com/johnzilla/notes/compare/v0.15...v0.16) | Retitled "Who Can Move Your Bitcoin?" with the subtitle "Questions to ask about any way of holding it." Adds a plain-language Start here section for people choosing how to hold bitcoin; the Audience row names both readers; drops the header label. Adds STYLE.md with the editing rules, including plain-language rules based on Simplified Technical English. |
 | [0.15](https://github.com/johnzilla/notes/blob/v0.15/what-a-custody-pitch-has-to-show.md) | [d4d3bc1](https://github.com/johnzilla/notes/commit/d4d3bc1) | Counter-sweep after theft of a signing set now also requires detecting the theft before the adversary's spend confirms; the lifecycle Loss or compromise row asks for monitoring of unauthorized spends. |
 | [0.14](https://github.com/johnzilla/notes/blob/v0.14/what-a-custody-pitch-has-to-show.md) | [bc2458e](https://github.com/johnzilla/notes/commit/bc2458e) | Scopes the RFC 6979 citation to deterministic derivation for honest signers, noting it does not bind a malicious signer; §6 "keys never leave the device" now also asks for an inventory of recovery, backup, debug, and export paths. |
 | [0.13](https://github.com/johnzilla/notes/blob/v0.13/what-a-custody-pitch-has-to-show.md) | [5217f7f](https://github.com/johnzilla/notes/commit/5217f7f) | Pre-review fixes. Scenario G covers threshold protocols producing ECDSA as well as Schnorr signatures, with the adapted-variant point scoped to FROST; signer nonce exfiltration covers ECDSA, citing RFC 6979; §6 adds questions for "keys never leave the device," "open source or reproducible," and "multiple vendors or devices"; §4 wording and order corrected; §1.3 label aligned. |
