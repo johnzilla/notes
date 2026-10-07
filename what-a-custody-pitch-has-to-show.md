@@ -6,7 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.11 — peer review draft |
+| **Version** | 0.12 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -49,7 +49,7 @@ For an actual assessment, identify the assets, authorized actions, participants,
 
 ### 1.1 Evidence and verdicts
 
-Each deployment finding should contain: **claim; configuration and date; public source or inspected artifact; verification performed; result; unresolved dependencies**. Record document revisions or source commits where available. A source describing a protocol is evidence of its specified behavior, not proof that a deployment implements it correctly. Published implementation source is likewise not evidence that the source was reviewed.
+Each deployment finding should contain: **claim; configuration and date; public source or inspected artifact; verification performed; result; unresolved dependencies**. Record document revisions or source commits where available. Record whether the procedure actually followed matches the procedure assessed; a finding covers the assessed procedure, not departures from it. A source describing a protocol is evidence of its specified behavior, not proof that a deployment implements it correctly. Published implementation source is likewise not evidence that the source was reviewed.
 
 | Result | Meaning |
 | :---- | :---- |
@@ -246,7 +246,7 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 | **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
 | **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? Where are keys or backups physically gathered for signing, and for how long? | Approval rules, signer verification behavior, transaction records, update authority and firmware history, signing location and exposure window |
 | **Between uses** | What persists on each signer and at each backup location between uses: keys, firmware, configuration, registered policies? Who can reach it, and how would tampering or substitution be detected before the next use? | Inventory of persistent state, access records, tamper-evidence and pre-use verification procedure |
-| **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? | Recovery inventory and a recorded restoration exercise |
+| **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? Was each backup read back as stored, so that transcription and media errors would surface? When does each storage medium need refreshing? | Recovery inventory, a recorded restoration exercise, read-back records, and media refresh schedule |
 | **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
 | **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? Can a successor who did not build the arrangement complete recovery from the retained documentation alone? How are recovery and support requests authenticated, and could someone impersonating the holder, a successor, or the service trigger recovery or obtain material? | Every recovery path, successor access procedure, demonstrated spend, recovery exercise by someone other than the original operator, request-authentication procedure |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
@@ -281,7 +281,9 @@ These are threshold counts, not probabilities or counts of independent organizat
 
 The threshold counts keys, not software. List every component that touches, or can influence signing by, t or more keys: coordinator, setup host, shared library, update channel, and backup or restoration environment. If compromised, such a component can act against all of those keys at once. Treat it as reaching a quorum unless the signers' own verification independently constrains what it can cause. A component reaching fewer than t keys still reduces the number of independent compromises an attacker needs.
 
-Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. A host or coordinator connected to every signer is a shared component whatever the devices' origins: it sees every transfer channel, supplies each signer's inputs, and receives each signer's outputs. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence.
+Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. A host or coordinator connected to every signer is a shared component whatever the devices' origins: it sees every transfer channel, supplies each signer's inputs, and receives each signer's outputs. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence. Equally, a period without known failures is not evidence of soundness: failures can go undetected or unreported, and the incentive to exploit a latent flaw can grow with the value it protects.
+
+Quorum size and key independence are different properties. A threshold sized for loss and theft of backups concerns stored copies and their locations. Independent key generation concerns whether one defect or one compromised environment can affect several keys when they are created. Keys generated in one environment can satisfy the first property and fail the second; keys generated on separate devices can satisfy the second while sharing a backup location that fails the first. Record each property separately; neither establishes the other.
 
 Reusing a passphrase across independent mnemonics does not merge their seeds. It does create a common recovery dependency: loss of that passphrase can defeat all restores that require it. Disclosure removes that additional protection but does not reveal the separate mnemonics. Copying the same underlying seed is a different failure of independence. This distinction follows the mnemonic-to-seed derivation. [BIP 39](https://bips.dev/39/)
 
