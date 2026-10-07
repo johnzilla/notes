@@ -1,262 +1,264 @@
-**NOTE  ·  PUBLIC SCENARIOS**
+**NOTE · PUBLIC CUSTODY WORKFLOWS**
 
-**What A Bitcoin Custody Pitch Has To Show**
+# What A Bitcoin Custody Pitch Has To Show
 
-*A claim-versus-artifact note. Patterns, not providers. No finding in this document is a statement about any firm's intent, solvency, or character.*
+*A threat-model and evidence-review framework. Configurations, not providers.*
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
 | **Date** | 6 October 2026 |
-| **Audience** | A new holder choosing among public pitches, and a security reviewer asked to look at one. A new holder can start at §1.3 and §6, and use the glossary in §1.2 for the rest. |
-| **Method** | Same shape as an evidence-based audit: stated claim, scope, artifact that would establish the claim, what public materials typically supply instead. |
-| **Revision** | Replaces the single-standard analogy with an audit posture. Adds a glossary, a summary matrix, a threshold-signature scenario, and a section on privacy and coercion. Corrects the on-chain verification advice and the quorum arithmetic. Tightens the multisig count, the B and G matrix cells, and the two 2-of-2 cases to match the prose. Still no firm, person, or product names. |
-| **Not this** | Not a vendor review. Not a ranking. Not an allegation. Names are omitted on purpose. A reader who maps a pattern onto a firm has done their own work. |
+| **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
+| **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
+| **Revision** | Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
+| **Scope** | Direct on-chain custody and its signing, backup, and recovery arrangements; a separate section covers payment-channel settlement. This is not a finding about any organization, an incident survey, or an exhaustive assessment of every off-chain protocol. |
 
-# **1\. Why this shape**
+## 1. What the assessment establishes
 
-A newcomer is not offered a script. They are offered a sentence. "No single party can move your funds." "On-chain verifiable." "Different hardware vendors, so a supply-chain bug cannot reach you." "Insured by a market you have heard of." Each sentence can be true, false, or true of a different object than the one the listener pictured.
+A custody claim needs a defined object: a particular output, wallet, signing policy, recovery arrangement, or account. “Only you can spend” and “no single party can spend” describe different properties. Neither follows from a device count, an approval screen, or a backup count.
 
-The useful review is the one an auditor already knows how to do. A claim has a scope. The scope has an artifact. The opinion covers what the evidence supports, for that scope, at that date. Anything outside the scope is not a finding of wrongdoing. It is unexamined. Custody pitches deserve the same treatment.
+This document uses public protocol specifications to establish the behavior of the mechanisms below. The configurations specify who controls the required material; they are not assertions that an unnamed deployment has that allocation. Consequences derived from those configurations are identified as such. No customer wallet, private ceremony record, implementation build, or insurance contract has been inspected.
 
-The posture is borrowed from security validation and assurance work generally, not from any one standard. A validated module has a boundary, a stated mode of operation, and a policy that says what was demonstrated. A brochure that says "audited" or "compliant" without the report and its scope has not established the claim. The same standard is applied here. There is no lab in this market. The holder, or a reviewer the holder trusts, is the lab. Absence of the artifact is recorded as "not established." It is not recorded as misconduct.
+For an actual assessment, identify the assets, authorized actions, participants, trust boundaries, and capabilities being evaluated. Distinguish at least unauthorized spending, refusal or inability to spend, permanent loss of recovery material, transaction misdirection, and disclosure of wallet activity. Record the exact keys, shares, devices, administrators, files, and services accessible to each participant. Physical devices and nominally separate organizations are not automatically independent control domains.
 
-## **1.1 What a claim needs**
+### 1.1 Evidence and verdicts
 
-| To establish | The artifact |
+Each deployment finding should contain: **claim; configuration and date; public source or inspected artifact; verification performed; result; unresolved dependencies**. Record document revisions or source commits where available. A source describing a protocol is evidence of its specified behavior, not proof that a deployment implements it correctly.
+
+| Result | Meaning |
 | :---- | :---- |
-| **Who can spend** | The output descriptor or the miniscript, with every leaf and the condition that makes it valid. A diagram is not this artifact. |
-| **Who can freeze** | The same descriptor, read for paths that require a party the holder does not control, and for when those paths expire. |
-| **A control is consensus-enforced** | The condition appears in the script. A video call, a ticket queue, an allowlist in a database, and a hardware authenticator presented to a website do not. |
-| **A control is device-enforced** | The signer stores the cosigner set and displays destination, amount, fee, and change. The coordinator's screen does not count. |
-| **An assurance report applies** | Report, scope, date, and type. A Type I attestation is design at a point in time. It is not operating effectiveness, and it is not a certificate that the script matches the brochure. |
-| **Insurance changes the outcome** | The insuring clause, the exclusions, the proof of loss, and the limit. The name of the market is not this artifact. Insurance is a contract. It is not a reduction in attack probability. |
+| **Established within scope** | The inspected evidence and verification support the claim for the recorded scope. |
+| **Partial** | A specified part is supported; remaining conditions are identified. |
+| **Not established** | The necessary evidence was unavailable or not verified. |
+| **Contradicted under the stated configuration** | The configuration or inspected evidence permits behavior inconsistent with the claim. |
+| **Not applicable** | The claim does not concern this configuration. |
 
-Verdicts used below are only these: Established, Partial, Not established, Not applicable. A reviewer who disagrees should replace the verdict and keep the artifact column. That is the point of writing it this way.
+The scenario tables below state **protocol consequences and evidence requirements**, not deployment verdicts. Lack of evidence is not evidence of misconduct. Conversely, a claim disproved by the stated authorization rules is not merely an unanswered question.
 
-## **1.2 Terms**
+| Claim to establish | Required evidence and verification |
+| :---- | :---- |
+| **Who can spend** | Complete output policy, matched to the relevant outputs; every spending path; a mapping from keys or shares to actual controllers, including backups and recovery authority. |
+| **Who can block spending** | All available spending paths at the relevant time, plus required signing software, data, authentication, communication, and broadcast services. Separate signer refusal from other availability failures. |
+| **A control is consensus-enforced** | Identify the consensus rule and show that no alternate path bypasses the claimed restriction. |
+| **A signer verifies authorization** | Show how it authenticates the intended wallet policy and transaction. Verify destination, amount, fees, and change handling against trusted information. |
+| **Recovery works without a service** | A documented restoration and spend using the retained material, with that service unavailable; record software versions and the path exercised. |
+| **An audit applies** | Inspect the report's subject, scope, method, date or period, exclusions, and findings. A code review, operational assessment, and financial audit answer different questions. |
+| **Insurance covers the claimed loss** | Inspect the applicable policy, insured party, covered event, exclusions, limits, and claim requirements. Signing authority and contractual compensation require separate findings. |
+
+### 1.2 Terms and boundaries
 
 | Term | Meaning here |
 | :---- | :---- |
-| **Descriptor** | A short text record of the spending rules: which keys, which threshold, which paths, which timelocks. With it, compatible software can find the coins and build a spend. Signing still needs the keys. Without it, seeds alone may not be enough. Also called "the map" below. |
-| **Leaf** | One way to spend. A script can have several, each with its own signers and its own timelock. Each leaf is checked on its own. |
-| **Extended public key (xpub)** | The public half of a key, from which every receive address can be derived. Not a spending secret. Anyone holding it can see the balance and history. |
-| **Miniscript** | A structured way to write spending rules with several leaves. More expressive than a plain multisig, and supported by fewer wallets. |
-| **Coordinator** | The software that assembles the wallet at setup and builds each transaction for the devices to sign. It sees everything and signs nothing. |
-| **Timelock** | A condition that makes a leaf valid only after a time. Absolute timelocks open at a fixed block or date. Relative timelocks open a number of blocks after each coin confirms, and restart when the coin moves. |
-| **Module boundary** | Everything a claim depends on: keys, devices, software, files, people, procedures. Not just the parts in the pitch. |
+| **Key, signer, party** | A private key authorizes signatures; a signer is the component using it; a party controls components or credentials. Counting keys does not establish a count of independent parties. |
+| **Spending path** | A complete way to satisfy an output's authorization conditions. Assess every alternative, including recovery and delayed paths. |
+| **Taproot leaf** | A script in a Taproot tree. One leaf can contain multiple authorization alternatives; key-path spending is a separate route. |
+| **Descriptor** | A structured description of output scripts and keys, including derivation information where applicable. Descriptors can contain private keys. “Public-only descriptor” below excludes them. |
+| **Miniscript** | A structured subset of Script supporting analysis and construction of spending conditions; it is not synonymous with a Taproot tree. |
+| **Coordinator** | The role that assembles wallet information and transactions. Whether the same application also signs is an implementation fact. |
+| **Freeze** | In scenario tables, prevention of spending by withholding required signer cooperation. This does not cover every source of unavailability. |
+| **Loss versus compromise** | Loss removes legitimate access. Compromise gives an adversary access. A missing backup may be both; assess the consequences separately. |
 
-## **1.3 At a glance**
+These distinctions follow the descriptor, Miniscript, and Taproot specifications. [Descriptor format](https://bips.dev/380/), [Miniscript specification](https://bitcoin.sipa.be/miniscript/), [Taproot spending rules](https://bips.dev/341/)
 
-One row per scenario, plus a baseline for comparison. Each cell is the claim the detail section checks. Where a cell says "varies," the descriptor and the devices decide.
+For Taproot, inspect both the internal-key construction and the complete intended script tree. Establish who can produce a key-path signature, or document the construction that makes that path unavailable. A script-tree review alone cannot exclude a key-path bypass. Re-derive the output from the supplied policy and match its scriptPubKey to the actual UTXO. This verifies the commitment, not exclusive possession of private material. [Taproot descriptors](https://bips.dev/386/)
 
-| | Who can spend today | Who can freeze | Holder exit without the service | Map required | Setup-substitution exposure | Independent display | On-chain quorum |
-| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
-| **Baseline: single-sig + passphrase** | Holder (anyone with seed and passphrase) | No one | Yes, widest tooling | No | Device only | One device | None |
-| **A: distributed institutional** | Any 2 of 3 institutions | Any 2 institutions, by refusal | No | Held by the service | Service side | Not applicable, holder does not sign | 2-of-3, holder not in it |
-| **B: collaborative, holder quorum** | Holder alone; or 1 holder key plus firm | No one, while holder has both keys, the configuration file, and a coordinator other than the firm's | Yes, with both keys, the configuration file, and another coordinator | Yes | Yes, the web application assembles the wallet | Holder devices, varies | 2-of-3, holder holds 2 |
-| **C: time-layered joint** | Holder plus firm; later recovery partner plus firm; later holder alone | Firm, until the sovereign leaf matures | After expiry, if other software supports the script | Yes, and coordinator support for it | Yes | Varies | Per leaf |
-| **D: self-directed 2-of-3** | Any 2 of the holder's 3 | No one | Yes | Yes, critical | Yes, the coordinator | Only if devices register the cosigner set | 2-of-3, all holder |
-| **E: decaying 2-of-2** | Holder plus provider; holder alone after the timelock, per coin | Provider, until maturity, restarting on change | After maturity | Recovery data and tool | The provider's application | None, the phone does everything | 2-of-2, decaying to 1 |
-| **F: share-split seed** | Anyone with the device and PIN, or a threshold of shares | No one | Needs an implementation of the share format | No | Device only | One device | None |
-| **G: threshold signature (MPC)** | Per the provider's policy; the chain sees one key | Provider, if its share is needed to meet the threshold | Depends on key export or recovery | Not applicable | Provider side | The provider's application | None visible |
+### 1.3 Coverage by dimension
 
-# **2\. Seven scenarios, as they are usually pitched**
+Custody authority, signing mechanism, backup method, and recovery policy are separate dimensions. A split backup can protect one key of a multisig wallet. A threshold protocol can implement a signing key within a larger script. Device isolation and online exposure are further implementation choices.
 
-These are composites of language a new holder will meet. They are not profiles of any company. Several real products mix two of them and market the mix under one name. When that happens, assess each leaf of the script on its own. The brand is not the boundary. Two of the seven, F and G, are not multisig on-chain. A through E are, including the decaying 2-of-2. They are included because they are offered in the same sentence as multisig.
-
-## **2.1 Scenario A — distributed institutional custody**
-
-Pitch. Three independent institutions each hold a key. Two must sign. No single institution can move the funds. The holder never touches a signing device. The holder initiates, and each institution verifies the holder, often on a video call, often with a hardware authenticator. Insurance against institutional failure is offered as an add-on.
-
-Module boundary, as pitched. The holder hears "my bitcoin, checked by me." The objects in the pitch are an account, an authenticator, a verification procedure, and three institutional signers.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
+| Configuration | Spending authority under the stated configuration | Service-independent exit |
 | :---- | :---- | :---- |
-| No single institution can spend | **Partial** | True of a 2-of-3 if the keys are actually split and the ceremony holds. The artifact is the descriptor plus a ceremony summary. Marketing asserts both. Newcomers are rarely shown either. |
-| The institutions are independent | **Not established** | Independence is ownership, jurisdiction, and operations, not logos. Two signers under one court, one parent, or one hosting provider are one failure for a legal order or an outage. The artifact is who holds each key, where, and under which law. This is the argument of §3, applied to institutions. |
-| Only the holder can cause a spend | **Not established** | Initiation and a video check are application controls. They constrain the institution that chooses to follow them. They do not constrain the script. If the three keys are institutional, any two institutions can produce a consensus-valid spend without the holder. |
-| The holder can exit without the institutions | **Not established** | Nothing in the usual pitch gives the holder a key. Freeze and recovery are the same fact, read from two sides. |
-| Insurance removes the custody risk | **Not applicable** | Insurance prices a defined loss after a claim. It does not change who can sign. Exclusions, proof of loss, and adjudication sit outside the module. |
+| **Baseline: holder single-signature** | The holder's signing key, including any usable copies | With key material, wallet metadata, and usable software |
+| **A: distributed institutional 2-of-3** | Any two institutional keys | None provided to the holder |
+| **B: collaborative 2-of-3** | Both holder keys, or one holder key and the service key | With both holder keys and sufficient wallet metadata |
+| **C: multiple timed paths** | Each currently eligible path; earlier paths remain available as later ones mature | When the holder path is eligible and usable |
+| **D: holder-controlled 2-of-3** | Any two of the holder's keys | With two keys and sufficient wallet metadata |
+| **E: joint signing with delayed holder exit** | Holder plus service; holder alone after the specified delay | Per eligible UTXO |
+| **F: split backup of a single-signature secret** | One signing key; sufficient backup shares can restore it | With sufficient shares, any required passphrase, metadata, and compatible recovery software |
+| **G: threshold signing** | An authorized set of shares; consensus verifies the resulting signature | Depends on the available subset, protocol data, software, and recovery arrangement |
+| **H: account with external spending authority** | The external controller's underlying signing arrangement | No unilateral exit unless separately demonstrated |
+| **I: 2-of-3 escrow** | Any two of the transaction parties and dispute signer | Neither transaction party alone, absent another path |
 
-How to read it. This scenario can be a reasonable product. It is institutional custody with a separation-of-duties improvement over a single custodian, plus an optional contract. It is not self-custody, and it is not "only I can move it" unless a holder key is in the script. Asking for the descriptor is the whole review.
+These rows describe authorization, not relative safety. Sections 3–6 supply the workflow checks needed to evaluate a deployment.
 
-## **2.2 Scenario B — collaborative custody, holder holds the quorum**
+## 2. Configuration assessments
 
-Pitch. A 2-of-3. The holder has two keys, on two devices, with two seed backups. The firm holds the third, in cold storage, as backup and as a co-signer of convenience. The holder can spend with both of their own keys and never call the firm. The firm cannot spend with its one key. If the holder loses one key, the firm co-signs a recovery. A configuration file lets the holder rebuild the wallet in other software if the firm is gone.
+### 2.0 Baseline — holder-controlled single-signature custody
 
-Module boundary, as pitched. Two holder secrets, one firm secret, a configuration file that is not a secret, and a web application that assembles the wallet at setup and builds the transaction the device is asked to sign.
+One key authorizes spending. Online software, an isolated signing device, and an offline signing process can all implement this authority arrangement; their exposure and verification procedures need separate examination. Single-signature descriptors exist and identify the script and derivation needed to locate funds. [Single-key output descriptors](https://bips.dev/382/)
 
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| The firm cannot move the funds alone | **Established** | Follows from 2-of-3 if the third key is the only key the firm has, and no other leaf exists. This is a consensus fact. It is the property Scenario A does not have. It assumes the two holder keys in the descriptor are the keys on the holder's devices. See the next row. |
-| The holder keys in the wallet are the holder's | **Partial** | At setup, the web application chose which extended public keys entered the wallet. A substituted holder key gives whoever substituted it two of three. Containment is each holder device registering the cosigner set and showing it, as in Scenario D. Where the devices do that, and the holder compared, this is established. |
-| The holder can leave without the firm | **Partial** | True with both holder keys and the configuration file. Seeds alone do not identify the firm's extended public key or the paths. The file is an availability-critical part of the module, and it is often treated as paperwork. |
-| Losing one key is safe | **Partial** | Losing one key does not strand the funds. It also does not leave theft impossible. One holder key plus the firm's signer is a valid spend. The firm's approval of that co-sign is a procedure. Procedures fail differently from scripts. |
-| The application cannot redirect a payment | **Not established** | The web application constructs the transaction. Destination integrity is whatever the signing device displays. The firm cannot force the holder to read the device. Devices differ in what they show. |
-
-How to read it. The on-chain claim is the strongest of the custody scenarios, and it is narrow. It says the firm is not a custodian of the spending quorum. It does not say the firm's website is outside the trust boundary, at setup or at spend, and it does not say a co-sign request is reviewed by anything stronger than the firm's own process. Legal process can reach the firm. It cannot reach the UTXO with one key. The holder exit is the control, and only while the holder still has both keys and the file.
-
-## **2.3 Scenario C — time-layered joint custody**
-
-Pitch. During an insured term, neither the holder nor the firm can spend alone. The holder has keys. The firm co-signs. If the holder loses every key, a recovery partner and the firm can restore access after a delay. When the term ends, a further delay passes and the holder can spend alone. The rules are in Bitcoin script, so they survive the firm. Inheritance and disaster recovery are described as built in.
-
-Module boundary, as pitched. A miniscript with several leaves, each valid at a different time. A recovery partner. A policy term that is a calendar fact, not a block the holder picked. A sovereign leaf after expiry.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| Nobody can spend alone | **Partial** | Often true of the leaf that is valid today, and false of a leaf that becomes valid later. "Nobody" has to be checked per leaf. A recovery leaf that two service parties can satisfy is a second quorum, opened by a timelock. |
-| The holder is not frozen if the firm disappears | **Partial** | True after the sovereign leaf matures, and only if the holder still has the keys that leaf requires. Until then, refusal to co-sign is a freeze. Time-bounded is not the same as absent. |
-| The rules survive the firm | **Partial** | The rules survive in script. Spending under them needs a coordinator other than the firm's that can read this miniscript, build a spend for the leaf in question, and get the holder's devices to sign it. Fewer wallets support this than support plain multisig. The artifact is a named second implementation that has done it, not the statement that one could. |
-| The holder can verify this without trusting the firm | **Not established** | Verifiable means the holder has the descriptor and has checked each leaf, including the recovery leaf and its timelock. A page that says the vault is verifiable has not performed the verification. |
-| The layers match the brochure in force today | **Not established** | Public descriptions of this pattern have been more specific in some places than in others, and products under one brand have changed shape. The artifact is the descriptor for this vault, not the best explanation anyone has posted. |
-
-How to read it. A recovery leaf is not a scandal. It is the mechanism that makes total key loss recoverable. It is also the mechanism by which two service parties can spend once the delay has passed. Both descriptions are the same script. Insurance, if purchased, is the compensation for that leaf, not a deletion of it. Score the leaf. Do not score the motive.
-
-## **2.4 Scenario D — self-directed 2-of-3 with a desktop coordinator**
-
-Pitch. Three hardware devices, ideally three manufacturers. A free desktop application builds the wallet and the transactions. Any two devices spend. No company holds a key. The holder can lose one device or one seed. Different vendors mean a flaw at one company cannot expose the funds.
-
-Module boundary, as pitched. Three seeds, three devices, one descriptor, one coordinator on one computer, one operator. The pitch draws the boundary around the three logos. The module includes the coordinator, the computer, the descriptor backup, and the person who compared the fingerprints.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| Two signatures are required | **Established** | Consensus, once the descriptor is the one the devices think it is. This part is real. |
-| The coordinator cannot redirect funds | **Not established** | At setup, the coordinator chooses which extended public keys enter the wallet. A substituted key makes the attacker a cosigner. At spend, the coordinator builds the transaction. Containment is each device storing the cosigner set and displaying the output. Several devices commonly recommended in the same breath do not store the set. The laptop screen is not containment. |
-| One lost key is survivable | **Partial** | One lost seed is survivable. A lost descriptor is not, even with two seeds. There is no firm to call. The map is part of the module. |
-| Mixed vendors mitigate supply-chain attack | **Partial** | See §3. The narrow claim is true. The sentence as pitched is not. |
-
-## **2.5 Scenario E — decaying 2-of-2**
-
-Pitch. A key on the holder's phone or desktop, and a second key held by the application provider. Both must sign. A second factor — a code, a prompt, an authenticator — protects the provider's signature. If the provider disappears, or the second factor is lost, the holder can spend alone after a wait. The wait is described as about a year.
-
-Module boundary, as pitched. Two keys. A relative timelock on each deposit, starting when that deposit confirms, on the order of 26,000 to 65,000 blocks. Relative timelocks cap at 65,535 blocks, about fifteen months, so "about a year" sits near the consensus ceiling. A second factor that the holder experiences as part of sending. An open recovery tool for the case where the service is gone and the timelock has matured. One application that holds the holder key, builds the transaction, and shows it.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| The provider cannot move the funds | **Established** | True while the script is a 2-of-2 and the provider holds only one key. This is a consensus fact, and it is better than Scenario A on this one point. |
-| The second factor is a second key | **Not established** | The factor gates the provider's willingness to sign. It is not a leaf in the script. A failure of that check is a failure of the provider's procedure, not of consensus. |
-| The holder approves what they see | **Not established** | The holder key, the transaction builder, and the display are the same application on the same phone. Nothing independent of that phone shows the destination. The provider's co-sign is the only second check, and it is the provider's procedure. This is a weaker display position than Scenario B or D. |
-| The holder can exit today | **Not established** | Not this scenario. Exit without the provider waits on the timelock for those specific coins. Moving the coins starts the wait over, and every send returns change with a fresh timer. A wallet in regular use always has coins inside the window. This is a freeze until maturity, not a holder quorum. |
-| This is the layered joint-custody scenario | **Not applicable** | No recovery partner can spend without the holder. The sovereign leaf is the holder's own key, later. Scenario C has a leaf other parties can satisfy. This one does not. |
-
-How to read it. A reasonable phone wallet with a time-bounded co-signer. Not self-custody today, and not institutional custody either. The question to ask is which deposits, and which change outputs, are still inside the window. A device that can register an ordinary multisig and export that registration is not this scenario. That device, used as one signer in a desktop coordinator, is Scenario D. The export is a second copy of the map. It helps descriptor loss. It does not add a spend rule.
-
-## **2.6 Scenario F — one seed, split into shares**
-
-Pitch. Remove the single point of failure without the complexity of multisig. One wallet, split into several recovery shares. Any threshold of shares restores the wallet. Shares can be stored apart. No configuration file. No second device required to send. Often offered by a hardware maker as the backup a new holder should use instead of a quorum.
-
-Module boundary, as pitched. One secret. Shares of that secret. One device that holds the whole secret and signs. A share format that any restoring device has to implement.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| This is multisig, simplified | **Not established** | Multisig is several keys, and consensus requires a threshold of signatures. This is one key, split so that a threshold of shares rebuilds it. One device holds the whole key and signs alone. The chain cannot tell a share-split wallet from any other single-signature wallet. |
-| Losing one share does not lose the funds | **Partial** | True of the backup, if the threshold was set above one and the remaining shares still meet it. False of signing. The device that holds the secret, usually the one that created it, holds the wallet at all times. So does whoever gathers the threshold of shares in one place. |
-| No vendor boundary | **Partial** | The shares are an application format. If it is an open format with several implementations, exit is narrower than a seed in the common wordlist but not tied to one vendor. If it is proprietary, it is tied. The artifact is a second implementation that has restored from these shares. |
-| No map to lose | **Established** | There is no descriptor, because there is no cosigner set. That advantage is real, and it is the advantage of not having a quorum. |
-
-How to read it. A backup scheme for a single-signature wallet. Loss tolerance of the paper is real. Theft tolerance is the tolerance of one device, every day, not only at the moment of signing. A newcomer who accepts the pitch has changed modules without being told. Do not score it on the multisig rubric. Score it as single-signature plus a split backup.
-
-## **2.7 Scenario G — threshold signatures, no seed phrase**
-
-Pitch. No seed phrase to lose. The key is split among the holder's phone, the provider, and sometimes a backup party. No single party ever holds the full key, not even during signing. Policies — spending limits, approvals, allowlists — protect the funds. Recovery runs through a cloud backup or the provider.
-
-Module boundary, as pitched. One key on-chain. Several key shares held by several parties. A threshold-signing protocol run by the provider's software on each party's device. A policy engine on the provider's servers.
-
-### **Claim check**
-
-| Claim | Verdict | Why |
-| :---- | :---- | :---- |
-| No single party can move the funds | **Partial** | True of the shares if the protocol and its implementation hold. The chain sees one key and one signature. The threshold is enforced by software, not by consensus. Implementation flaws in threshold-signing libraries are a publicly documented class. The artifact is the protocol specification, an audit of this implementation, and the list of share holders. A descriptor will not help, because the descriptor is single-key. |
-| The provider cannot freeze the holder | **Partial** | Depends on whether the provider's share is needed to meet the threshold. If the holder's shares and a backup party can sign without it, refusal by the provider is not a freeze, though the signing software may still be the provider's. If the provider's share is required, refusal is a freeze until an export or recovery path is used. The artifact is the share map: who holds which share, and which combinations sign. |
-| Policies protect the funds | **Not established** | Limits, approvals, and allowlists are application controls. The chain accepts any valid signature. |
-| The holder can exit without the provider | **Not established** | Depends on a documented key export or recovery that produces a full key outside the provider's software. Where one exists, using it ends the scheme. What comes out is a single-signature wallet. |
-| This is multisig | **Not established** | Same answer as Scenario F, from the other side. F has one key and several backups. G has several shares and one key. Neither is a quorum the chain enforces. |
-
-How to read it. Multi-party custody with the quorum in the application, not the script. It can be a reasonable product, especially where the parties are institutions with their own audits. It is not "only I can move it," and "no seed phrase" means the recovery path is someone else's procedure. Score it on the software and the share holders, because there is no script to score.
-
-# **3\. The mixed-vendor sentence**
-
-The sentence a newcomer hears: use hardware from different manufacturers, so a supply-chain attack or a bug at one company cannot take the funds.
-
-The narrow claim, which is established. An independent second implementation contains a failure of one implementation's random-number generator or signing oracle, provided the other seeds were generated on other implementations and not recombined by a shared passphrase. Seed-generation defects in wallet hardware and software have been publicly disclosed more than once, including in 2026. Any one of them is enough to demonstrate the class. Firmware updated after the fact does not repair a seed created on the affected build. In a mixed 2-of-3 that defect is one share. In a single-signature wallet, or in three devices of that same build, it is the wallet. Diversity is a real containment control for correlated implementation failure. Calling it nothing would be wrong.
-
-The pitched claim, which is not established.
-
-* One purchase channel, one setup computer, and one operator are one supply chain, regardless of the logos on the boxes.
-
-* Different brands do not imply different secure elements, different recovery-word code, or different transaction parsers.
-
-* The coordinator and the host sit above the vendor boundary. A substituted cosigner key at setup is not stopped by which factory made the genuine devices.
-
-* The descriptor and the backup ritual are single-implementation by nature.
-
-* Entropy the operator adds — dice rolled once and copied, a passphrase reused on all three — puts the correlation back.
-
-An auditor would record the configuration that was actually tested: which devices register the cosigner set, where the descriptor is stored, whether setup happened on a machine the operator is willing to trust with a substitution attack. "Three brands" is not that configuration.
-
-# **4\. Does a larger quorum help**
-
-Pitch. 2-of-3 is the start. 3-of-5 is more secure, because an attacker needs more keys and the holder can lose more keys. The cost is more devices and more management, which is framed as the price of the improvement.
-
-On the two axes that are actually about the quorum, the larger one wins. An attacker needs three shares instead of two. The holder can lose two shares instead of one. It is the smallest quorum that survives a double loss while still requiring three keys to steal. A 2-of-4 also survives a double loss, at a theft bar of two. The witness is larger, so the fee is higher. That is the entire consensus difference.
-
-It does not change the class of control. A substituted cosigner key at setup, a coordinator that builds the transaction, a map nobody stored, a co-sign desk that approves on a procedure, and a recovery leaf two service parties can satisfy are all still present at 3-of-5. They were never quorum problems.
-
-The overhead is not neutral. A 2-of-3 with a seed backup per key is six items to place. A 3-of-5 on the same rule is ten. The setup comparison Scenario D already fails is now done across five devices instead of three. Five seeds generated on one machine, five backups in one safe, or one passphrase reused across the set collapse toward one component. Correlated failure does not honor the threshold.
-
-Who holds the extra keys matters more than the count. Two more keys in the holder's other locations raise the theft bar and the loss bar together. Two more keys at service parties raise the collusion surface and can remove the holder quorum. That is arrangement, already the difference between Scenario A and Scenario B. A larger threshold does not convert one into the other.
-
-Verdict. Partial, and only for an operator who already runs a clean 2-of-3, already stores the map away from the seeds, and specifically needs to survive two independent losses. For everyone else it is more management on the same module. The failures that take funds are not the ones the extra keys touch. A 2-of-2 is the other direction, and it should not be sold as the safer small quorum. A plain 2-of-2 with no timelock is lost forever if either key is lost. Scenario E softens one side only: a lost provider key is a freeze until maturity, and a lost holder key is still forever.
-
-# **5\. Two things the pitches leave out**
-
-Privacy. Any party holding the extended public keys or the configuration file can derive every address, and with it the balance and history. That includes the firm in B and C, the institutions in A, and the provider in E and G. In D, a server the coordinator queries usually sees the addresses it was asked about, and sees the extended public keys only if the coordinator sent them. That is a narrower finding, and still a targeting finding. None of this is a spend risk. It is a targeting risk, and for many holders the likelier one. Ask who holds the public keys after setup, and for how long.
-
-Coercion. A holder-held quorum is a strength against a firm and a weakness against a person standing in the holder's kitchen. Whatever the holder can do alone, the holder can be made to do. A co-signer that applies a delay or a review, or a timelock nobody can shorten, is a real control against that attack. It is the same control that makes A, C, and E able to freeze, and G where the provider's share is required. Score it in both directions. The scenarios are not ranked, because the threat a given holder faces decides which side of that trade matters.
-
-# **6\. What a pleb can do with this**
-
-No scenario above is disqualified. Each is a different module. The mistake available to a new holder is accepting a sentence from one scenario as a property of another.
-
-| If the pitch says | Ask for |
+| Property | Consequence and evidence requirement |
 | :---- | :---- |
-| **Only you can initiate** | Show me the leaf that fails without a signature from a key I hold. |
-| **No single party can move it** | List every party that holds a key. Then list every leaf, including the ones that are not valid yet. |
-| **Independent institutions** | Who holds each key, in which jurisdiction, under which parent company? |
-| **You can always recover** | Who signs that recovery, after how long, and what do I hold while I wait? |
-| **Verifiable on-chain** | The descriptor, and the address I derive from it in software the firm does not run, matching the address that holds my coins. An explorer shows a hash until the coins move, and some leaves never appear on-chain at all. Not a screenshot of a dashboard. |
-| **Insured** | The insuring clause and the exclusions. Separately, who can sign. Those are different documents. |
-| **We are audited** | Which report, which scope, which date, Type I or Type II. Then whether the scope included the script. |
-| **Use three brands** | Which of the three devices will show me the other keys, and the destination, on its own screen? |
-| **You can lose one key** | What else, besides a key, reconstructs this wallet? Where is that copy? |
-| **Simpler than multisig** | After I restore, how many signatures does the chain require? If the answer is one, it is not a quorum. |
-| **No seed phrase** | Who holds the shares, what enforces the threshold, and how do I get a usable key out if you are gone? |
-| **We co-sign, and you can recover later** | Who can satisfy the recovery leaf, and which of my coins, including change, are still inside the window? |
-| **We only see your public keys** | Then you can see every address and balance. Who else can, and how long is it kept? |
-| **3-of-5 is safer** | Safer against which failure? Show the one a third key actually closes. |
+| **Unauthorized spending** | A usable copy of the relevant private key is sufficient. Enumerate the active signer, backups, exports, and restore environments. |
+| **Availability** | No external cosigner is required by this configuration. That does not establish independence from a particular application or recovery service. Demonstrate another usable spend workflow. |
+| **Recovery** | Retain the applicable secret format, derivation paths, script type, account information, and any additional secret required to restore. Demonstrate address recovery and signing. |
+| **Transaction integrity** | Establish how the recipient is authenticated and compared with the signed transaction. An accurate display cannot correct an already substituted payment instruction. |
 
-A firm that answers with the artifact has supplied what the claim needs. A firm that answers with a restatement of the pitch is asking the holder to validate the brochure. Those are observably different. Neither answer is a character reference.
+Where a mnemonic passphrase is used, distinguish the mnemonic from the derived binary seed. Under BIP 39, both mnemonic and passphrase determine the seed; a copied derived seed or spending key does not additionally need that passphrase. A wrong passphrase produces another wallet rather than a universal “incorrect password” result. [Mnemonic derivation](https://bips.dev/39/)
 
-# **7\. Limits**
+### 2.1 Scenario A — distributed institutional custody
 
-* Patterns were taken from public marketing and public technical descriptions current in 2026\. They will drift. The method does not. Re-read the descriptor, not this note.
+Three institutional controllers each have one key; an on-chain 2-of-3 policy is the only spending path. The holder has no signing key. The following consequences are deductions from that allocation and the specified multisig threshold. [Multisig descriptors](https://bips.dev/383/)
 
-* No script was pulled from the chain. A holder with a vault can close every "not established" in an afternoon. This note cannot.
+| Claim | Consequence and evidence requirement |
+| :---- | :---- |
+| **No single institution can spend** | Supported by the allocation only if no institution controls a second key or an alternate path. A descriptor establishes public keys, not their exclusive control. |
+| **Only the holder can authorize movement** | Not enforced by the stated script: two institutional keys suffice. Assess customer authorization as an operational control, including who can override it. |
+| **One institution can freeze the wallet** | One refusal leaves two signers; two refusals block this path. Shared dependencies can make multiple signers unavailable together. |
+| **The holder can exit independently** | Contradicted by this configuration unless an additional exit mechanism exists. |
 
-* A reader in this market will recognize some patterns. Recognition is not attribution. The document does not name a firm, a person, or a product, and it does not invite that mapping as a conclusion.
+Review control over backups, administrative access, signing requests, and recovery ceremonies. Shared ownership, infrastructure, or jurisdiction are dependencies to investigate; they do not by themselves prove identical behavior or a common outage. Insurance or an assurance report does not replace this authority mapping.
 
-* Nothing here alleges an incident, a theft, a false statement made knowingly, or an inability to pay a claim. "Not established" means the artifact was not in the pitch.
+### 2.2 Scenario B — collaborative custody with a holder quorum
 
+The sole spending policy is 2-of-3. The holder controls two independent keys and a service controls the third. The holder can satisfy the threshold without the service; the service's single key cannot satisfy it alone. This is an allocation consequence, conditional on the actual keys and absence of other paths.
 
+| Review point | Consequence and evidence requirement |
+| :---- | :---- |
+| **Setup substitution** | Replacing one holder key gives an unrelated attacker one key. It gives an attacker controlling the service key a quorum. State which keys and software the attacker controls. |
+| **One holder key unavailable** | The remaining holder key and service can spend. The service now has a veto over that recovery path. |
+| **One holder key compromised** | Unauthorized spending additionally requires the other holder key or the service's signature. Assess service authorization independently. |
+| **Exit** | Demonstrate spending with both holder keys and retained wallet metadata, without service authentication or access to its servers. |
+
+Verify each signer's actual key in the intended policy and compare the policy and derived address across trusted displays or independently authenticated records. A short fingerprint is an identifier, not sufficient proof of key identity. Registering an incorrect policy preserves the error. [Secure multisig setup](https://bips.dev/129/)
+
+### 2.3 Scenario C — custody with multiple timed spending paths
+
+Review the actual script rather than inferring timing from a contract term. For a configuration specifying a holder-and-service path, a delayed recovery-partner-and-service path, and a later holder-only path, enumerate which paths are eligible at each UTXO's current age or chain height/time. This is an analytical description of those conditions, not an assertion about a deployment.
+
+Minimum-time conditions open paths; they do not disable earlier ones. The service and recovery partner can remain authorized after the holder-only path opens. A holder-only path therefore establishes an additional exit option, not exclusive control. Moving to a new output policy is required to remove an old path from the funds being moved. Delayed recovery constructions are publicly specified. [Absolute-lock recovery examples](https://bips.dev/65/), [Relative-lock examples](https://bips.dev/112/)
+
+Require the exact policy, key-to-controller mapping, timing units, relevant UTXOs, and a demonstrated spend for each promised recovery route. For inheritance, separately inspect how successors obtain the required material and authority. A timelock does not verify death, incapacity, or entitlement.
+
+### 2.4 Scenario D — holder-controlled 2-of-3
+
+The holder controls all three keys. Any two satisfy the stated policy. Distinct devices do not establish distinct seed generation or separate backup access.
+
+| Review point | Consequence and evidence requirement |
+| :---- | :---- |
+| **One key permanently unavailable** | The other two suffice if the complete spending policy can still be reconstructed. Loss of one device need not be loss of its key. |
+| **Wallet metadata unavailable** | Two private keys do not necessarily supply the third public key, derivation paths, or original script. Inspect remaining exports, signer records, and backups before concluding permanent loss. |
+| **Coordinator compromise** | Verify policy at setup, receiving addresses before funding, and transaction outputs and change at spending. |
+| **Signer policy validation** | Require authenticated policy verification; persistent storage is one implementation choice. An independent display and stored registration are distinct properties. |
+
+Metadata includes the actual key ordering or sorting rule and the script wrapper. Published derivation conventions assist interoperability but do not prove that a particular wallet used them. [Multisig derivation](https://bips.dev/48/), [Public-key ordering](https://bips.dev/67/)
+
+The signer must recognize the intended policy and verify that change remains protected by it. Storage alone does not establish this behavior, and a stateless design is not automatically incapable of it. Inspect the actual implementation and user confirmation flow. [Wallet policies](https://bips.dev/388/)
+
+### 2.5 Scenario E — joint signing with delayed unilateral recovery
+
+An immediate path requires the holder and service; a delayed path requires the holder alone. A service-side second factor gates that service's participation. It is not an additional consensus signature requirement. Script-enforced delayed exit and a separately stored, pre-signed refund are different recovery arrangements; establish which is present. [Delayed recovery and refund mechanisms](https://bips.dev/65/)
+
+For relative locks, record the encoded value and type. BIP 68 supports up to 65,535 blocks or 65,535 units of 512 seconds. The latter is about 388 days; the block-based limit is about 455 days at the nominal ten-minute interval, not a guaranteed calendar duration. Time-based eligibility uses median-time-past. [Relative-lock encoding](https://bips.dev/68/), [Lock-time clock](https://bips.dev/113/)
+
+A fresh relative delay applies to new outputs carrying that policy, including change when created. Spending some UTXOs does not reset untouched UTXOs. A transaction need not create change. Determine exit eligibility per output.
+
+Before maturity, service refusal blocks the joint path. After maturity, the holder can use the delayed path if the required key, metadata, and software remain available. The same delayed path is available to an attacker who has compromised that holder key. Provider refusal no longer prevents that spend. Permanent loss of every usable copy of the holder key defeats both stated paths.
+
+Do not infer display independence from this policy. Assess whether signing and transaction presentation share a compromised component, and what independent verification exists.
+
+### 2.6 Scenario F — split backup of a single-signature secret
+
+This is a backup method. In the configuration assessed here, restoration reconstructs a secret used by one signer; the backup threshold is not a consensus signing threshold. Threshold secret sharing and threshold signing are distinct operations. [Secret-sharing construction, Appendix C](https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C)
+
+For a simple t-of-n backup, losing one share preserves recoverability when n−1 is at least t. A threshold above one is not required for loss tolerance. Separately, compromise of sufficient shares can expose the restored secret, subject to any additional protection. Compromise of the active signer can bypass the need to obtain backup shares.
+
+Assess share format, thresholds, any group structure, passphrase requirements, compatibility, and the environment where restoration collects secrets. Demonstrate restoration without the original service. Single-signature wallet metadata remains relevant; “no cosigner set” does not mean “no descriptor” or “no recovery metadata.”
+
+Apply this backup assessment separately to each protected key when shares are used inside a multisig arrangement.
+
+### 2.7 Scenario G — threshold or aggregate signing
+
+A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count. This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification](https://www.rfc-editor.org/rfc/rfc9591.html)
+
+Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants. Verify the actual protocol and access structure. [Aggregate multisignature specification](https://bips.dev/327/)
+
+| Review point | Required evidence |
+| :---- | :---- |
+| **No party has unilateral authority** | Map shares, usable backups, dealer-generated material, and recovery access to controllers. Absence of a mnemonic proves none of these properties. |
+| **Policies protect spending** | Identify who enforces each limit or approval, who can change it, and whether another authorized subset bypasses it. |
+| **Provider-independent exit** | Demonstrate an authorized subset signing outside the provider's infrastructure, or a documented recovery/export route. Full-key reconstruction is not inherently required for a withdrawal. |
+| **Export retires old authority** | Exporting a full key does not invalidate existing shares. Move funds to a new policy to remove the old signing authority over those funds. |
+
+The public output policy remains relevant, especially when the aggregate key is combined with script recovery paths. Record protocol data and derivation information needed for recovery. “One signature on-chain” establishes neither one controller nor the absence of a quorum.
+
+### 2.8 Scenario H — an account with external spending authority
+
+When the holder has account credentials but no usable signing or unilateral recovery path, assess withdrawal authorization and underlying custody separately. The external controller may use single-signature, multisig, or threshold signing. Those mechanisms do not by themselves give the account holder an exit path.
+
+Require evidence connecting the account entitlement, withdrawal process, and underlying funds. Inspect deposit attribution, withdrawal destination changes, authentication recovery, privileged overrides, and reconciliation. A public address or valid signature is evidence about an output or key; neither alone establishes the completeness of account liabilities or the holder's contractual rights. Those are separate evidence requirements, outside this document's protocol findings.
+
+### 2.9 Scenario I — escrow and shared control
+
+A 2-of-3 escrow assigns keys to two transaction parties and a dispute signer. Any pair can satisfy the threshold. The dispute signer cannot spend alone, but can cooperate with either party; the script does not decide whether their action complies with the agreement. Neither transaction party has unilateral exit under the plain policy. [Multisignature escrow specification](https://bips.dev/11/)
+
+Assess agreement and destination verification, signer identity, dispute authorization, availability, and any timeout or refund path. A pure 2-of-2 instead requires both keys and has no tolerance for permanent loss of either key unless another recovery mechanism exists. Pre-signed transactions can change what remains possible after key loss, so include them in the authority inventory.
+
+### 2.10 Payment channels and other off-chain arrangements
+
+A funding-output descriptor alone is insufficient for a payment channel. For the commitment-and-revocation protocol referenced here, review the current enforceable state, retained signatures, revocation material, unilateral-close transactions, delayed outputs, pending conditional payments, and the ability to monitor and respond before applicable deadlines. An old state backup is not interchangeable with a current state. Settlement may require several on-chain transactions and adequate fees. These requirements follow the documented commitment and settlement structure. [Channel transaction specification](https://github.com/lightning/bolts/blob/master/03-transactions.md)
+
+For other off-chain arrangements, identify the exact published protocol before assigning findings. Record what the holder owns or controls, who controls the backing outputs, and every dependency of redemption. Do not transfer the conclusions of an on-chain multisig row to an unexamined off-chain design.
+
+## 3. Review the complete custody lifecycle
+
+Apply this worksheet to every configuration. Record actual evidence and observed results; a proposed test is not a passed test. Recovery exercises should use designated test funds and material rather than exposing production secrets to a review environment.
+
+| Stage | Questions the review must resolve | Evidence to retain |
+| :---- | :---- | :---- |
+| **Creation** | Who generates each secret? Who can copy, export, replace, or restore it? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions |
+| **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
+| **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? | Approval rules, signer verification behavior, transaction records |
+| **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? | Recovery inventory and a recorded restoration exercise |
+| **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
+| **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? | Every recovery path, successor access procedure, demonstrated spend |
+| **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
+| **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure, confirmation and deadline monitoring |
+
+Transaction interchange data can carry scripts, derivation information, partial signatures, and signing constraints. Verify the actual transaction and signature-hash behavior rather than treating an approval action as proof of what was authorized. Retain required pre-signed recovery transactions as recovery artifacts, with their covered outputs and restrictions. [Partially signed transaction format](https://bips.dev/174/)
+
+## 4. Independence, quorum size, and shared failures
+
+For a plain t-of-n policy with distinct keys, no alternate spending route, and all other recovery dependencies available:
+
+- A spend requires valid signatures from t distinct keys. An attacker may obtain these through key compromise or by inducing authorized signers to sign an unauthorized transaction.
+- Up to n−t unavailable keys leave a signing quorum.
+- Withholding n−t+1 keys prevents that path from being satisfied.
+
+These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig threshold semantics](https://bips.dev/383/)
+
+Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence.
+
+Reusing a passphrase across independent mnemonics does not merge their seeds. It does create a common recovery dependency: loss of that passphrase can defeat all restores that require it. Disclosure removes that additional protection but does not reveal the separate mnemonics. Copying the same underlying seed is a different failure of independence. This distinction follows the mnemonic-to-seed derivation. [BIP 39](https://bips.dev/39/)
+
+Compare transaction costs for the actual construction at the same feerate. A larger conventional multisig witness has a different size from a smaller one, but an aggregate key-path signature need not grow with participant count. Script choice and the exercised path matter. [Witness-script construction](https://bips.dev/382/), [Taproot signature validation](https://bips.dev/342/)
+
+## 5. Privacy and coercion
+
+An xpub exposes non-hardened descendant public keys in its subtree. It does not automatically reveal every account or every multisig address: deriving the latter also requires the other keys and policy. A complete public-only descriptor can expose the addresses within its defined range and branches. Record what each service actually receives, retains, and queries. [Hierarchical key derivation](https://bips.dev/32/)
+
+Public data alone does not authorize spending. However, a parent xpub combined with a corresponding non-hardened descendant private key can expose the parent private key. Treat this documented compound failure separately from privacy loss and from compromise of a full wallet quorum. [Extended-key security implications](https://bips.dev/32/)
+
+For coercion, assess which signing material and approvals a person can access within the relevant time. A holder-controlled quorum may be geographically separated; a service approval may be obtainable under coercion. Neither ownership label establishes resistance. A delay constrains only paths that actually require it, and a mature fallback may bypass a service review. Record the available paths and practical access procedure rather than assigning a universal ranking.
+
+## 6. Questions that make a claim reviewable
+
+| If the claim is | Request |
+| :---- | :---- |
+| **Only I can authorize spending** | Show that every available spending path requires authority exclusively controlled by me. Identify copies, recovery overrides, and future paths. |
+| **No single party can spend** | Map every authorized key/share combination to controllers, including administrators and backup access. |
+| **The policy is verifiable on-chain** | Supply the complete public policy; independently derive and match the relevant outputs. Separately establish control of the secrets. |
+| **My funds cannot be frozen** | Show a usable path without each dependency being assessed, including required data, software, authentication, and broadcast access. |
+| **Recovery is guaranteed** | Specify the failure being survived, retained artifacts, timing, and an observed recovery result. |
+| **A device verifies everything** | Demonstrate policy authentication, recipient verification, fee checks, and change recognition for the actual script. |
+| **Backups remove the single point of failure** | Identify whether redundancy protects stored recovery material, active signing, or both. |
+| **No mnemonic is needed** | Show the share/secret inventory, derivation data, recovery authority, and independent exit procedure. |
+| **More signers are safer** | State which compromise and loss combinations change outcome, and identify shared dependencies. |
+| **Audited or insured** | Provide the applicable report or contract and its scope. Keep technical control and contractual protection as separate findings. |
+
+## 7. Limits and source use
+
+The linked public specifications were consulted on 6 October 2026 and support the mechanisms discussed. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
+
+This review framework does not supply incident likelihoods, legal classifications, insurance interpretations, or conclusions about an unnamed provider. It deliberately leaves implementation and organizational findings unresolved until evidence is inspected. A protocol-valid spend, operational independence, and successful account withdrawal are separate claims.
+
+For each actual assessment, preserve the source version and review date, wallet or protocol version, relevant policy and outputs, and the verification result. Reassess when funds move to a different policy, signing or recovery authority changes, or an implementation changes. An unexamined path remains an unexamined path; a familiar label does not close it.
