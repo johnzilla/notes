@@ -6,7 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.12 — peer review draft |
+| **Version** | 0.13 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -103,7 +103,7 @@ Custody authority, signing mechanism, backup method, and recovery policy are sep
 | **D: holder-controlled 2-of-3** | Any two of the holder's keys | With two keys and sufficient wallet metadata |
 | **E: joint signing with delayed holder exit** | Holder plus service; holder alone after the specified delay | Per eligible UTXO |
 | **F: split backup of a single-signature secret** | One signing key; sufficient backup shares can restore it | With sufficient shares, any required passphrase, metadata, and compatible recovery software |
-| **G: threshold signing** | An authorized set of shares; consensus verifies the resulting signature | Depends on the available subset, protocol data, software, and recovery arrangement |
+| **G: threshold or aggregate signing** | An authorized set of shares; consensus verifies the resulting signature | Depends on the available subset, protocol data, software, and recovery arrangement |
 | **H: account with external spending authority** | The external controller's underlying signing arrangement | No unilateral exit unless separately demonstrated |
 | **I: 2-of-3 escrow** | Any two of the transaction parties and dispute signer | Neither transaction party alone, absent another path |
 
@@ -203,7 +203,7 @@ Apply this backup assessment separately to each protected key when shares are us
 
 ### 2.7 Scenario G — threshold or aggregate signing
 
-A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count, provided the signature is valid under Bitcoin's Schnorr rules. RFC 9591's secp256k1 ciphersuite uses 33-byte compressed points and its own challenge hash, so its signatures are not BIP 340 signatures as specified; a Bitcoin deployment uses an adapted variant. Record which variant and which specification it follows. [Schnorr signatures (BIP 340)](https://bips.dev/340/) This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification (FROST, RFC 9591)](https://www.rfc-editor.org/rfc/rfc9591.html)
+A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. This differs from an application approval policy. Consensus verifies the resulting signature without separately checking the participant count. The signature must be valid under the rules of the output being spent: BIP 340 Schnorr for Taproot outputs, ECDSA for earlier output types. A threshold protocol may target either. FROST, as specified in RFC 9591, produces Schnorr signatures, but its secp256k1 ciphersuite uses 33-byte compressed points and its own challenge hash, so its signatures are not BIP 340 signatures as specified; a Bitcoin deployment of FROST uses an adapted variant. Record which protocol, which variant, and which specification it follows. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification (FROST, RFC 9591)](https://www.rfc-editor.org/rfc/rfc9591.html), [Schnorr signatures (BIP 340)](https://bips.dev/340/), [Taproot spending rules (BIP 341)](https://bips.dev/341/)
 
 Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants: MuSig2 is an n-of-n scheme, while FROST supports t-of-n. Verify the actual protocol and access structure. [Aggregate multisignature specification (MuSig2, BIP 327)](https://bips.dev/327/)
 
@@ -254,7 +254,7 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 
 A signer's verification behavior is only as trustworthy as the code performing it. Establish how firmware and signing software are authenticated before first use and at each update, and who holds update-signing authority. Record build evidence at four separate levels: published source; a build reproducible from that source; independent parties who have reproduced and attested the released binary; and evidence that the device runs that binary, as distinct from its report that it does. Each level is a separate finding. Where signing occurs in a remote or coordinated service, treat that service's operator, infrastructure, and administrators as control points in the authority map. Device diversity limits a defect to the devices sharing it; it does not authenticate any one device (§4).
 
-A compromised signer can leak its key without any visible change to the transaction it signs. Schnorr signing as specified is not a unique-signature scheme: the signer chooses its nonce, and nonce selection can deliberately encode key material in signatures that are then published. Data the signer returns over the transfer channel is a second route. BIP 340 documents a mitigation in which another device contributes randomness that the signer provably incorporates into its nonce. Request whether such a protocol is in use, what crosses the transfer channel in each direction, and what checks the receiving side performs. [Nonce exfiltration protection (BIP 340)](https://bips.dev/340/)
+A compromised signer can leak its key without any visible change to the transaction it signs. Both signature schemes Bitcoin uses leave the per-signature nonce to the signer. BIP 340 Schnorr signing is not a unique-signature scheme. ECDSA requires a fresh per-signature value whose derivation verifiers do not see, and bias in that value can be turned into attacks on the key. Nonce selection can therefore deliberately encode key material in signatures that are then published. Data the signer returns over the transfer channel is a second route. For Schnorr signing, BIP 340 documents a mitigation in which another device contributes randomness that the signer provably incorporates into its nonce. Request whether such a protocol is in use for the signature scheme actually used, what crosses the transfer channel in each direction, and what checks the receiving side performs. [Nonce exfiltration protection (BIP 340)](https://bips.dev/340/), [ECDSA nonce requirements (RFC 6979)](https://www.rfc-editor.org/rfc/rfc6979.html)
 
 Transaction interchange data can carry scripts, derivation information, partial signatures, and signing constraints. Verify the actual transaction and signature-hash behavior rather than treating an approval action as proof of what was authorized. Retain required pre-signed recovery transactions as recovery artifacts, with their covered outputs and restrictions. [Partially signed transaction format](https://bips.dev/174/)
 
@@ -275,13 +275,15 @@ For a plain t-of-n policy with distinct keys, no alternate spending route, and a
 - A spend requires valid signatures from t distinct keys. An attacker may obtain these through key compromise or by inducing authorized signers to sign an unauthorized transaction.
 - Up to n−t unavailable keys leave a signing quorum.
 - Withholding n−t+1 keys prevents that path from being satisfied.
-- If an adversary obtains a signing set of t keys, the holder can move funds first only if at least t other usable keys remain (n−t ≥ t). The outcome is then a broadcast race (§3.1).
+- If an adversary obtains a signing set of t keys, the holder can compete to move the funds only if at least t other usable keys remain (n−t ≥ t). The outcome is then a broadcast race (§3.1).
 
-These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. Neither leaves a counter-sweep after theft of a signing set, since one and two keys remain; that requires n ≥ 2t, as in 2-of-4 or 3-of-6. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
+These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Neither leaves a counter-sweep after theft of a signing set, since one and two keys remain; that requires n ≥ 2t, as in 2-of-4 or 3-of-6. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
 
 The threshold counts keys, not software. List every component that touches, or can influence signing by, t or more keys: coordinator, setup host, shared library, update channel, and backup or restoration environment. If compromised, such a component can act against all of those keys at once. Treat it as reaching a quorum unless the signers' own verification independently constrains what it can cause. A component reaching fewer than t keys still reduces the number of independent compromises an attacker needs.
 
-Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. A host or coordinator connected to every signer is a shared component whatever the devices' origins: it sees every transfer channel, supplies each signer's inputs, and receives each signer's outputs. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence. Equally, a period without known failures is not evidence of soundness: failures can go undetected or unreported, and the incentive to exploit a latent flaw can grow with the value it protects.
+Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. A host or coordinator connected to every signer is a shared component whatever the devices' origins: it sees every transfer channel, supplies each signer's inputs, and receives each signer's outputs. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access.
+
+Do not claim a particular failure frequency without cited incident evidence. Equally, a period without known failures is not evidence of soundness: failures can go undetected or unreported, and the incentive to exploit a latent flaw can grow with the value it protects.
 
 Quorum size and key independence are different properties. A threshold sized for loss and theft of backups concerns stored copies and their locations. Independent key generation concerns whether one defect or one compromised environment can affect several keys when they are created. Keys generated in one environment can satisfy the first property and fail the second; keys generated on separate devices can satisfy the second while sharing a backup location that fails the first. Record each property separately; neither establishes the other.
 
@@ -317,6 +319,9 @@ For coercion, assess which signing material and approvals a person can access wi
 | **My funds cannot be frozen** | Show a usable path that survives the loss of each dependency in turn, including required data, software, authentication, and broadcast access. Address signer freeze and platform freeze separately. |
 | **Recovery is guaranteed** | Specify the failure being survived, retained artifacts, timing, and an observed recovery result. |
 | **A device verifies everything** | Demonstrate policy authentication, recipient verification, fee checks, and change recognition for the actual script. |
+| **Keys never leave the device** | Show what crosses the transfer channel in each direction and whether signing uses nonce-exfiltration protection. A key can leak through signatures without leaving as a key (§3). |
+| **Open source or reproducible** | State which of the four build-evidence levels (§3) is shown, for the binary actually running, and by whom. |
+| **Multiple vendors or devices** | Identify the host, coordinator, and software that reach t or more keys (§4), and the components the devices share. |
 | **Backups remove the single point of failure** | Identify whether redundancy protects stored recovery material, active signing, or both. |
 | **No mnemonic is needed** | Show the share/secret inventory, derivation data, recovery authority, and independent exit procedure. |
 | **More signers are safer** | State which compromise and loss combinations change outcome, and identify shared dependencies. |
@@ -353,7 +358,7 @@ Each source is listed once with the version consulted and the sections that cite
 | [BIP 327](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki) | MuSig2 for BIP340-compatible Multi-Signatures | §2.7 |
 | [BIP 331](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0331.mediawiki) | Ancestor Package Relay | §3.1 |
 | [BIP 340](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0340.mediawiki) | Schnorr Signatures for secp256k1 | §2.7, §3, §4 |
-| [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §4, §5 |
+| [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §2.7, §4, §5 |
 | [BIP 380](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0380.mediawiki) | Output Script Descriptors General Operation | §1.2 |
 | [BIP 382](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0382.mediawiki) | Segwit Output Script Descriptors | Baseline, §4 |
 | [BIP 383](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0383.mediawiki) | Multisig Output Script Descriptors | §2.1, §4 |
@@ -366,6 +371,7 @@ Each source is listed once with the version consulted and the sections that cite
 | Reference | Title and version | Cited in |
 | :---- | :---- | :---- |
 | [RFC 9591](https://www.rfc-editor.org/rfc/rfc9591.html) | The Flexible Round-Optimized Schnorr Threshold (FROST) Protocol for Two-Round Schnorr Signatures. RFCs are immutable once published. | §2.7 |
+| [RFC 6979](https://www.rfc-editor.org/rfc/rfc6979.html) | Deterministic Usage of the Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA). RFCs are immutable once published. | §3 |
 | [SLIP-39](https://github.com/satoshilabs/slips/blob/78c87bc63ba1e4479dad7ffd3b18584430d8efb6/slip-0039.md) | Shamir's Secret-Sharing for Mnemonic Codes, at satoshilabs/slips commit 78c87bc | §2.6 |
 | [BOLT 3](https://github.com/lightning/bolts/blob/444805d12ab98c30006173bb190cd9d6fce9e405/03-transactions.md) | Bitcoin Transaction and Script Formats, at lightning/bolts commit 444805d | §2.10 |
 | [Miniscript](https://github.com/sipa/miniscript/blob/6806dfb15a1fafabf7dd28aae3c9d2bc49db01f1/index.html) | Miniscript specification, published at bitcoin.sipa.be/miniscript; source at sipa/miniscript commit 6806dfb | §1.2 |
