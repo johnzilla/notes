@@ -6,6 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
+| **Version** | 0.9 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -359,18 +360,16 @@ Each source is listed once with the version consulted and the sections that cite
 
 ## Changelog
 
-Newest first. Each entry links the commit that completed it; the full history is in the repository.
+Newest first. Each version links to its tagged text, which stays fixed after later changes; the commit column links the main change. Versioning: the minor number changes when a claim, consequence, or citation changes; the major number changes when section numbering, the method, or the document's structure changes in a way that breaks references. Typo-only edits do not change the version. Version 1.0 will follow resolution of the peer review round.
 
-| Commit | Change |
-| :---- | :---- |
-| This revision | Citation labels now name what each specification defines. Removes the signing-protocol secret-sharing citation from the split-backup scenario; relabels BIP 11, BIP 65, BIP 112, BIP 382, and BIP 383 citations; cites BIP 341 and BIP 340 rather than BIP 342 for key-path cost; notes that RFC 9591's secp256k1 suite is not BIP 340-compatible; names the P2SH redeem script; clarifies the §6 freeze request. |
-| [3c93c6e](https://github.com/johnzilla/notes/commit/3c93c6e) | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
-| [13d110e](https://github.com/johnzilla/notes/commit/13d110e) | Removes the document date. |
-| [254bd1c](https://github.com/johnzilla/notes/commit/254bd1c) | Adds §3.1 on deadlines, fee feasibility, and reorganizations; signing-device and supply-chain review in §1.2 and §3; and transaction- and service-level privacy in §5. |
-| [43a147d](https://github.com/johnzilla/notes/commit/43a147d) | Names split-secret forms and SLIP-39 in §2.6, and FROST and MuSig2 in §2.7. Splits signer freeze from platform freeze, adds account suspension to Scenario H, and renames the §1.3 exit column. |
-| [62f35b5](https://github.com/johnzilla/notes/commit/62f35b5) | Adds contents, unnumbers the baseline so scenario numbers stay stable, standardizes scenario table headers, and pins the BOLT 3 reference. |
-| [63a737c](https://github.com/johnzilla/notes/commit/63a737c) | Rewritten as a threat-model and evidence-review framework for technical reviewers. Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
-| [9a0c177](https://github.com/johnzilla/notes/commit/9a0c177) | Renamed and retitled "What A Bitcoin Custody Pitch Has To Show." |
-| [7b7e48a](https://github.com/johnzilla/notes/commit/7b7e48a) | Corrects the multisig count, tightens two summary-matrix cells, and separates the two 2-of-2 cases. |
-| [2f49d34](https://github.com/johnzilla/notes/commit/2f49d34) | Replaces the single-standard analogy with an audit posture. Adds a glossary, summary matrix, threshold-signature scenario, and privacy and coercion section. |
-| [63fa367](https://github.com/johnzilla/notes/commit/63fa367) | Initial draft: six pitched custody scenarios assessed claim against artifact. |
+| Version | Commit | Change |
+| :---- | :---- | :---- |
+| [0.9](https://github.com/johnzilla/notes/blob/v0.9/what-a-custody-pitch-has-to-show.md) | [a0ec345](https://github.com/johnzilla/notes/commit/a0ec345) | Citation labels now name what each specification defines. Removes the signing-protocol secret-sharing citation from the split-backup scenario; relabels BIP 11, BIP 65, BIP 112, BIP 382, and BIP 383 citations; cites BIP 341 and BIP 340 rather than BIP 342 for key-path cost; notes that RFC 9591's secp256k1 suite is not BIP 340-compatible; names the P2SH redeem script; clarifies the §6 freeze request. Adds version numbering. |
+| [0.8](https://github.com/johnzilla/notes/blob/v0.8/what-a-custody-pitch-has-to-show.md) | [3c93c6e](https://github.com/johnzilla/notes/commit/3c93c6e) | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
+| [0.7](https://github.com/johnzilla/notes/blob/v0.7/what-a-custody-pitch-has-to-show.md) | [254bd1c](https://github.com/johnzilla/notes/commit/254bd1c) | Adds §3.1 on deadlines, fee feasibility, and reorganizations; signing-device and supply-chain review in §1.2 and §3; and transaction- and service-level privacy in §5. Removes the document date. |
+| [0.6](https://github.com/johnzilla/notes/blob/v0.6/what-a-custody-pitch-has-to-show.md) | [43a147d](https://github.com/johnzilla/notes/commit/43a147d) | Names split-secret forms and SLIP-39 in §2.6, and FROST and MuSig2 in §2.7. Splits signer freeze from platform freeze, adds account suspension to Scenario H, and renames the §1.3 exit column. |
+| [0.5](https://github.com/johnzilla/notes/blob/v0.5/what-a-custody-pitch-has-to-show.md) | [62f35b5](https://github.com/johnzilla/notes/commit/62f35b5) | Adds contents, unnumbers the baseline so scenario numbers stay stable, standardizes scenario table headers, and pins the BOLT 3 reference. |
+| [0.4](https://github.com/johnzilla/notes/blob/v0.4/what-a-custody-pitch-has-to-show.md) | [63a737c](https://github.com/johnzilla/notes/commit/63a737c) | Rewritten as a threat-model and evidence-review framework for technical reviewers. Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
+| [0.3](https://github.com/johnzilla/notes/blob/v0.3/what-a-custody-pitch-has-to-show.md) | [7b7e48a](https://github.com/johnzilla/notes/commit/7b7e48a) | Renamed and retitled "What A Bitcoin Custody Pitch Has To Show." Corrects the multisig count, tightens two summary-matrix cells, and separates the two 2-of-2 cases. |
+| [0.2](https://github.com/johnzilla/notes/blob/v0.2/20261006-Multivendor-Multisig-ThreatModel.md) | [2f49d34](https://github.com/johnzilla/notes/commit/2f49d34) | Replaces the single-standard analogy with an audit posture. Adds a glossary, summary matrix, threshold-signature scenario, and privacy and coercion section. |
+| [0.1](https://github.com/johnzilla/notes/blob/v0.1/20261006-Multivendor-Multisig-ThreatModel.md) | [5b802b0](https://github.com/johnzilla/notes/commit/5b802b0) | Initial draft: six pitched custody scenarios assessed claim against artifact. |
