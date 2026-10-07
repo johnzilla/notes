@@ -6,7 +6,7 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Version** | 0.9 — peer review draft |
+| **Version** | 0.10 — peer review draft |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Changes** | See the [changelog](#changelog). |
@@ -49,7 +49,7 @@ For an actual assessment, identify the assets, authorized actions, participants,
 
 ### 1.1 Evidence and verdicts
 
-Each deployment finding should contain: **claim; configuration and date; public source or inspected artifact; verification performed; result; unresolved dependencies**. Record document revisions or source commits where available. A source describing a protocol is evidence of its specified behavior, not proof that a deployment implements it correctly.
+Each deployment finding should contain: **claim; configuration and date; public source or inspected artifact; verification performed; result; unresolved dependencies**. Record document revisions or source commits where available. A source describing a protocol is evidence of its specified behavior, not proof that a deployment implements it correctly. Published implementation source is likewise not evidence that the source was reviewed.
 
 | Result | Meaning |
 | :---- | :---- |
@@ -81,6 +81,7 @@ The scenario tables below state **protocol consequences and evidence requirement
 | **Descriptor** | A structured description of output scripts and keys, including derivation information where applicable. Descriptors can contain private keys. “Public-only descriptor” below excludes them. |
 | **Miniscript** | A structured subset of Script supporting analysis and construction of spending conditions; it is not synonymous with a Taproot tree. |
 | **Coordinator** | The role that assembles wallet information and transactions. Whether the same application also signs is an implementation fact. |
+| **Transfer channel** | The path between a signer and a networked host, by cable, removable media, displayed codes, or any other medium. Data crosses it in both directions. Changing the medium changes the channel's properties, not its existence. |
 | **Signing device and supply chain** | The signer's hardware, firmware, and software, and the route by which each reaches it: procurement, delivery, initialization, update authority, and build provenance. A genuine device running substituted firmware, or a remote signing service, is a different signer for review purposes. |
 | **Freeze** | Two variants. *Signer freeze*: prevention of spending by withholding required signer cooperation. *Platform freeze*: suspension of an account or service workflow, such as withdrawals, authentication, or signing requests, regardless of any signer's willingness. Scenario tables mean signer freeze unless they say otherwise. Neither covers every source of unavailability. |
 | **Loss versus compromise** | Loss removes legitimate access. Compromise gives an adversary access. A missing backup may be both; assess the consequences separately. |
@@ -241,14 +242,16 @@ Apply this worksheet to every configuration. Record actual evidence and observed
 | :---- | :---- | :---- |
 | **Creation** | Who generates each secret, on what device and firmware? How was that device obtained and its firmware authenticated? Who can copy, export, replace, or restore the secret? Do recovery administrators span a quorum? | Generation and backup procedures, authority map, implementation versions, procurement and firmware-verification records |
 | **Setup and funding** | Do intended keys and policy match across participants? Is the verified receiving output the one funded? Are all alternate paths included? | Public-only policy, authenticated key records, address comparisons, funding outputs |
-| **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? | Approval rules, signer verification behavior, transaction records, update authority and firmware history |
+| **Routine spending** | Who requests and approves? How is the recipient authenticated? What exactly is signed, including fees and change? Who can update signer firmware or a remote signing service, and could an update change what is signed or displayed? Where are keys or backups physically gathered for signing, and for how long? | Approval rules, signer verification behavior, transaction records, update authority and firmware history, signing location and exposure window |
 | **Backup and restoration** | Which secrets, metadata, passwords, and software are required? Which common failures affect multiple copies? | Recovery inventory and a recorded restoration exercise |
 | **Loss or compromise** | Which material is unavailable, and which may be held by an adversary? Can the remaining authority move funds to a safe policy? | Separate loss and compromise findings, migration procedure |
 | **Recovery and succession** | Who obtains authority, by what evidence, after what delay? Does recovery bypass normal approvals? | Every recovery path, successor access procedure, demonstrated spend |
 | **Rotation and exit** | Which outputs retain the old policy? Are old backups or shares still usable against them? Can the replacement workflow operate independently? | Old-to-new output mapping, new recovery records, exit exercise |
 | **Broadcast and settlement** | Can valid transactions reach the network and confirm within any required window? How are fees and dependent transactions handled? | Broadcast alternatives, fee procedure and budget, fee-bumping outputs, confirmation and deadline monitoring (§3.1) |
 
-A signer's verification behavior is only as trustworthy as the code performing it. Establish how firmware and signing software are authenticated before first use and at each update, who holds update-signing authority, and whether the build can be reproduced from published source. Where signing occurs in a remote or coordinated service, treat that service's operator, infrastructure, and administrators as control points in the authority map. Device diversity limits a defect to the devices sharing it; it does not authenticate any one device (§4).
+A signer's verification behavior is only as trustworthy as the code performing it. Establish how firmware and signing software are authenticated before first use and at each update, and who holds update-signing authority. Record build evidence at four separate levels: published source; a build reproducible from that source; independent parties who have reproduced and attested the released binary; and evidence that the device runs that binary, as distinct from its report that it does. Each level is a separate finding. Where signing occurs in a remote or coordinated service, treat that service's operator, infrastructure, and administrators as control points in the authority map. Device diversity limits a defect to the devices sharing it; it does not authenticate any one device (§4).
+
+A compromised signer can leak its key without any visible change to the transaction it signs. Schnorr signing as specified is not a unique-signature scheme: the signer chooses its nonce, and nonce selection can deliberately encode key material in signatures that are then published. Data the signer returns over the transfer channel is a second route. BIP 340 documents a mitigation in which another device contributes randomness that the signer provably incorporates into its nonce. Request whether such a protocol is in use, what crosses the transfer channel in each direction, and what checks the receiving side performs. [Nonce exfiltration protection (BIP 340)](https://bips.dev/340/)
 
 Transaction interchange data can carry scripts, derivation information, partial signatures, and signing constraints. Verify the actual transaction and signature-hash behavior rather than treating an approval action as proof of what was authorized. Retain required pre-signed recovery transactions as recovery artifacts, with their covered outputs and restrictions. [Partially signed transaction format](https://bips.dev/174/)
 
@@ -269,10 +272,13 @@ For a plain t-of-n policy with distinct keys, no alternate spending route, and a
 - A spend requires valid signatures from t distinct keys. An attacker may obtain these through key compromise or by inducing authorized signers to sign an unauthorized transaction.
 - Up to n−t unavailable keys leave a signing quorum.
 - Withholding n−t+1 keys prevents that path from being satisfied.
+- If an adversary obtains a signing set of t keys, the holder can move funds first only if at least t other usable keys remain (n−t ≥ t). The outcome is then a broadcast race (§3.1).
 
-These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
+These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. Neither leaves a counter-sweep after theft of a signing set, since one and two keys remain; that requires n ≥ 2t, as in 2-of-4 or 3-of-6. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
 
-Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence.
+The threshold counts keys, not software. List every component that touches, or can influence signing by, t or more keys: coordinator, setup host, shared library, update channel, and backup or restoration environment. If compromised, such a component can act against all of those keys at once. Treat it as reaching a quorum unless the signers' own verification independently constrains what it can cause. A component reaching fewer than t keys still reduces the number of independent compromises an attacker needs.
+
+Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. A host or coordinator connected to every signer is a shared component whatever the devices' origins: it sees every transfer channel, supplies each signer's inputs, and receives each signer's outputs. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence.
 
 Reusing a passphrase across independent mnemonics does not merge their seeds. It does create a common recovery dependency: loss of that passphrase can defeat all restores that require it. Disclosure removes that additional protection but does not reveal the separate mnemonics. Copying the same underlying seed is a different failure of independence. This distinction follows the mnemonic-to-seed derivation. [BIP 39](https://bips.dev/39/)
 
@@ -340,7 +346,7 @@ Each source is listed once with the version consulted and the sections that cite
 | [BIP 174](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0174.mediawiki) | Partially Signed Bitcoin Transaction Format | §3 |
 | [BIP 327](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki) | MuSig2 for BIP340-compatible Multi-Signatures | §2.7 |
 | [BIP 331](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0331.mediawiki) | Ancestor Package Relay | §3.1 |
-| [BIP 340](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0340.mediawiki) | Schnorr Signatures for secp256k1 | §2.7, §4 |
+| [BIP 340](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0340.mediawiki) | Schnorr Signatures for secp256k1 | §2.7, §3, §4 |
 | [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §4, §5 |
 | [BIP 380](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0380.mediawiki) | Output Script Descriptors General Operation | §1.2 |
 | [BIP 382](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0382.mediawiki) | Segwit Output Script Descriptors | Baseline, §4 |
