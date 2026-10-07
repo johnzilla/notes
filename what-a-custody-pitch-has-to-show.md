@@ -111,7 +111,7 @@ These rows describe authorization, not relative safety. Sections 3–6 supply th
 
 ### Baseline — holder-controlled single-signature custody
 
-One key authorizes spending. Online software, an isolated signing device, and an offline signing process can all implement this authority arrangement; their exposure and verification procedures need separate examination. Single-signature descriptors exist and identify the script and derivation needed to locate funds. [Single-key output descriptors](https://bips.dev/382/)
+One key authorizes spending. Online software, an isolated signing device, and an offline signing process can all implement this authority arrangement; their exposure and verification procedures need separate examination. Single-signature descriptors exist and identify the script and derivation needed to locate funds. [Segwit output descriptors, including single-key wpkh() (BIP 382)](https://bips.dev/382/)
 
 | Review point | Consequence and evidence requirement |
 | :---- | :---- |
@@ -152,7 +152,7 @@ Verify each signer's actual key in the intended policy and compare the policy an
 
 Review the actual script rather than inferring timing from a contract term. For a configuration specifying a holder-and-service path, a delayed recovery-partner-and-service path, and a later holder-only path, enumerate which paths are eligible at each UTXO's current age or chain height/time. This is an analytical description of those conditions, not an assertion about a deployment.
 
-Minimum-time conditions open paths; they do not disable earlier ones. The service and recovery partner can remain authorized after the holder-only path opens. A holder-only path therefore establishes an additional exit option, not exclusive control. Moving to a new output policy is required to remove an old path from the funds being moved. Delayed recovery constructions are publicly specified. [Absolute-lock recovery examples](https://bips.dev/65/), [Relative-lock examples](https://bips.dev/112/)
+Minimum-time conditions open paths; they do not disable earlier ones. The service and recovery partner can remain authorized after the holder-only path opens. A holder-only path therefore establishes an additional exit option, not exclusive control. Moving to a new output policy is required to remove an old path from the funds being moved. The timelock primitives these paths use are specified consensus rules. Their specifications sketch recovery and refund uses as motivation; that documents the pattern, not any deployment's construction. [Absolute lock-time opcode (BIP 65)](https://bips.dev/65/), [Relative lock-time opcode (BIP 112)](https://bips.dev/112/)
 
 Require the exact policy, key-to-controller mapping, timing units, relevant UTXOs, and a demonstrated spend for each promised recovery route. For inheritance, separately inspect how successors obtain the required material and authority. A timelock does not verify death, incapacity, or entitlement.
 
@@ -173,7 +173,7 @@ The signer must recognize the intended policy and verify that change remains pro
 
 ### 2.5 Scenario E — joint signing with delayed unilateral recovery
 
-An immediate path requires the holder and service; a delayed path requires the holder alone. A service-side second factor gates that service's participation. It is not an additional consensus signature requirement. Script-enforced delayed exit and a separately stored, pre-signed refund are different recovery arrangements; establish which is present. [Delayed recovery and refund mechanisms](https://bips.dev/65/)
+An immediate path requires the holder and service; a delayed path requires the holder alone. A service-side second factor gates that service's participation. It is not an additional consensus signature requirement. Script-enforced delayed exit and a separately stored, pre-signed refund are different recovery arrangements; establish which is present. [Absolute lock-time opcode (BIP 65)](https://bips.dev/65/), [Relative lock-time opcode (BIP 112)](https://bips.dev/112/)
 
 For relative locks, record the encoded value and type. BIP 68 supports up to 65,535 blocks or 65,535 units of 512 seconds. The latter is about 388 days; the block-based limit is about 455 days at the nominal ten-minute interval, not a guaranteed calendar duration. Time-based eligibility uses median-time-past. [Relative-lock encoding](https://bips.dev/68/), [Lock-time clock](https://bips.dev/113/)
 
@@ -187,7 +187,7 @@ Do not infer display independence from this policy. Assess whether signing and t
 
 ### 2.6 Scenario F — split backup of a single-signature secret
 
-This is a backup method. Record which secret form is split: a mnemonic, the binary seed derived from it, an extended private key, or a raw private key. Each restores a different scope and carries different passphrase and derivation requirements. A split mnemonic still needs any mnemonic passphrase; a split derived seed does not; a split extended private key restores only its subtree; a split raw key restores one key. In the configuration assessed here, restoration yields material from which one signer derives its key. The backup threshold is not a consensus signing threshold. Threshold secret sharing and threshold signing are distinct operations. [Secret-sharing construction, Appendix C](https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C)
+This is a backup method. Record which secret form is split: a mnemonic, the binary seed derived from it, an extended private key, or a raw private key. Each restores a different scope and carries different passphrase and derivation requirements. A split mnemonic still needs any mnemonic passphrase; a split derived seed does not; a split extended private key restores only its subtree; a split raw key restores one key. In the configuration assessed here, restoration yields material from which one signer derives its key. The backup threshold is not a consensus signing threshold. Threshold secret sharing of a backup and threshold signing are distinct constructions; the dealer-based sharing used to set up a signing protocol is not this backup.
 
 SLIP-39 is a published share format for this purpose. It splits a master secret into mnemonic shares, supports two-level group thresholds, and applies its own passphrase encryption, under which every passphrase yields a valid but different wallet. It is not a share encoding of a BIP 39 mnemonic. Converting an existing BIP 39 wallet requires splitting the 512-bit derived seed, which produces longer shares and carries over only one mnemonic-and-passphrase combination; the specification instead recommends moving funds to a new SLIP-39 wallet. Record which share format is in use and which recovery software implements it. [SLIP-39 at commit 78c87bc](https://github.com/satoshilabs/slips/blob/78c87bc63ba1e4479dad7ffd3b18584430d8efb6/slip-0039.md)
 
@@ -199,7 +199,7 @@ Apply this backup assessment separately to each protected key when shares are us
 
 ### 2.7 Scenario G — threshold or aggregate signing
 
-A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count. This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification (FROST, RFC 9591)](https://www.rfc-editor.org/rfc/rfc9591.html)
+A threshold-signature protocol allows an authorized subset of share holders to generate a signature under one public key. Its threshold is cryptographically enforced under the protocol's assumptions. Consensus verifies the resulting signature without separately checking the participant count, provided the signature is valid under Bitcoin's Schnorr rules. RFC 9591's secp256k1 ciphersuite uses 33-byte compressed points and its own challenge hash, so its signatures are not BIP 340 signatures as specified; a Bitcoin deployment uses an adapted variant. Record which variant and which specification it follows. [Schnorr signatures (BIP 340)](https://bips.dev/340/) This differs from an application approval policy. Review key generation, share allocation, nonce handling, protocol version, and implementation evidence. [Threshold-signature specification (FROST, RFC 9591)](https://www.rfc-editor.org/rfc/rfc9591.html)
 
 Do not assume every aggregate-signature scheme supports arbitrary t-of-n signing. Some require all participants: MuSig2 is an n-of-n scheme, while FROST supports t-of-n. Verify the actual protocol and access structure. [Aggregate multisignature specification (MuSig2, BIP 327)](https://bips.dev/327/)
 
@@ -222,7 +222,7 @@ Account-level controls can block withdrawal regardless of the underlying signing
 
 ### 2.9 Scenario I — escrow and shared control
 
-A 2-of-3 escrow assigns keys to two transaction parties and a dispute signer. Any pair can satisfy the threshold. The dispute signer cannot spend alone, but can cooperate with either party; the script does not decide whether their action complies with the agreement. Neither transaction party has unilateral exit under the plain policy. [Multisignature escrow specification](https://bips.dev/11/)
+A 2-of-3 escrow assigns keys to two transaction parties and a dispute signer. Any pair can satisfy the threshold. The dispute signer cannot spend alone, but can cooperate with either party; the script does not decide whether their action complies with the agreement. Neither transaction party has unilateral exit under the plain policy. The threshold behavior is that of the standard M-of-N output type; escrow is a use of it, which that specification's motivation describes but does not define. [M-of-N output type (BIP 11)](https://bips.dev/11/)
 
 Assess agreement and destination verification, signer identity, dispute authorization, availability, and any timeout or refund path. A pure 2-of-2 instead requires both keys and has no tolerance for permanent loss of either key unless another recovery mechanism exists. Pre-signed transactions can change what remains possible after key loss, so include them in the authority inventory.
 
@@ -269,13 +269,13 @@ For a plain t-of-n policy with distinct keys, no alternate spending route, and a
 - Up to n−t unavailable keys leave a signing quorum.
 - Withholding n−t+1 keys prevents that path from being satisfied.
 
-These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig threshold semantics](https://bips.dev/383/)
+These are threshold counts, not probabilities or counts of independent organizations. For 2-of-3 the corresponding values are two, one, and two; for 3-of-5 they are three, two, and three. A two-key compromise therefore has a different outcome in the two configurations. Additional keys do not automatically correct a substituted policy, shared administrator, or missing recovery artifact. [Multisig descriptors (BIP 383)](https://bips.dev/383/)
 
 Implementation diversity can limit the reach of a defect confined to one implementation. That conclusion requires separate affected components and uncompromised verification elsewhere; different labels do not establish it. Record shared entropy sources, libraries, update authority, procurement, setup hosts, backup locations, and operator access. Do not claim a particular failure frequency without cited incident evidence.
 
 Reusing a passphrase across independent mnemonics does not merge their seeds. It does create a common recovery dependency: loss of that passphrase can defeat all restores that require it. Disclosure removes that additional protection but does not reveal the separate mnemonics. Copying the same underlying seed is a different failure of independence. This distinction follows the mnemonic-to-seed derivation. [BIP 39](https://bips.dev/39/)
 
-Compare transaction costs for the actual construction at the same feerate. A larger conventional multisig witness has a different size from a smaller one, but an aggregate key-path signature need not grow with participant count. Script choice and the exercised path matter. [Witness-script construction](https://bips.dev/382/), [Taproot signature validation](https://bips.dev/342/)
+Compare transaction costs for the actual construction at the same feerate. A larger conventional multisig witness has a different size from a smaller one, but an aggregate key-path signature need not grow with participant count. Script choice and the exercised path matter. [Segwit output descriptors (BIP 382)](https://bips.dev/382/), [Taproot key-path spending (BIP 341)](https://bips.dev/341/), [Schnorr signatures (BIP 340)](https://bips.dev/340/)
 
 ## 5. Privacy and coercion
 
@@ -287,7 +287,7 @@ Wallet activity also leaks through transactions and services. Assess each separa
 
 - **Input clustering.** Spending several outputs in one transaction links them under the common assumption that one entity controls all inputs. Record the coin-selection behavior and whether the holder can control it.
 - **Change identification.** Change can often be distinguished by script type, amount precision, or output ordering. Change returned under a distinctive policy can be linked to the wallet when later spent. Record how change is constructed.
-- **Spend-time policy disclosure.** Spending a script-based multisig output publishes the complete witness script, including every public key in it and the threshold. A Taproot script-path spend reveals the executed leaf and its inclusion proof, not the other leaves; a key-path spend reveals no script. A distinctive policy template, such as an uncommon threshold or timelock, can make one wallet's outputs recognizable as a group once spent. [Taproot spending rules](https://bips.dev/341/)
+- **Spend-time policy disclosure.** Spending a P2SH or P2WSH multisig output publishes the complete redeem or witness script, including every public key in it and the threshold. A Taproot script-path spend reveals the executed leaf and its inclusion proof, not the other leaves; a key-path spend reveals no script. A distinctive policy template, such as an uncommon threshold or timelock, can make one wallet's outputs recognizable as a group once spent. [Taproot spending rules](https://bips.dev/341/)
 - **Address reuse.** Receiving more than once to one address links those payments regardless of other measures.
 - **Service-side retention.** Coordinators, signing services, and blockchain-data servers may record network addresses, queried addresses, xpubs, labels, transaction history, and identity linkage. Request what is collected and retained, for how long, and who can be compelled to produce it.
 - **Broadcast origin.** The first relaying node or service can associate a transaction with a network location. Record the broadcast route.
@@ -332,15 +332,15 @@ Each source is listed once with the version consulted and the sections that cite
 | [BIP 65](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0065.mediawiki) | OP_CHECKLOCKTIMEVERIFY | §2.3, §2.5 |
 | [BIP 67](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0067.mediawiki) | Deterministic Pay-to-script-hash multi-signature addresses through public key sorting | §2.4 |
 | [BIP 68](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0068.mediawiki) | Relative lock-time using consensus-enforced sequence numbers | §2.5, §3.1 |
-| [BIP 112](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0112.mediawiki) | CHECKSEQUENCEVERIFY | §2.3 |
+| [BIP 112](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0112.mediawiki) | CHECKSEQUENCEVERIFY | §2.3, §2.5 |
 | [BIP 113](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0113.mediawiki) | Median time-past as endpoint for lock-time calculations | §2.5, §3.1 |
 | [BIP 125](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0125.mediawiki) | Opt-in Full Replace-by-Fee Signaling | §3.1 |
 | [BIP 129](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki) | Bitcoin Secure Multisig Setup (BSMS) | §2.2 |
 | [BIP 174](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0174.mediawiki) | Partially Signed Bitcoin Transaction Format | §3 |
 | [BIP 327](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki) | MuSig2 for BIP340-compatible Multi-Signatures | §2.7 |
 | [BIP 331](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0331.mediawiki) | Ancestor Package Relay | §3.1 |
-| [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §5 |
-| [BIP 342](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0342.mediawiki) | Validation of Taproot Scripts | §4 |
+| [BIP 340](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0340.mediawiki) | Schnorr Signatures for secp256k1 | §2.7, §4 |
+| [BIP 341](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki) | Taproot: SegWit version 1 spending rules | §1.2, §4, §5 |
 | [BIP 380](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0380.mediawiki) | Output Script Descriptors General Operation | §1.2 |
 | [BIP 382](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0382.mediawiki) | Segwit Output Script Descriptors | Baseline, §4 |
 | [BIP 383](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0383.mediawiki) | Multisig Output Script Descriptors | §2.1, §4 |
@@ -352,7 +352,7 @@ Each source is listed once with the version consulted and the sections that cite
 
 | Reference | Title and version | Cited in |
 | :---- | :---- | :---- |
-| [RFC 9591](https://www.rfc-editor.org/rfc/rfc9591.html) | The Flexible Round-Optimized Schnorr Threshold (FROST) Protocol for Two-Round Schnorr Signatures. RFCs are immutable once published. | §2.6, §2.7 |
+| [RFC 9591](https://www.rfc-editor.org/rfc/rfc9591.html) | The Flexible Round-Optimized Schnorr Threshold (FROST) Protocol for Two-Round Schnorr Signatures. RFCs are immutable once published. | §2.7 |
 | [SLIP-39](https://github.com/satoshilabs/slips/blob/78c87bc63ba1e4479dad7ffd3b18584430d8efb6/slip-0039.md) | Shamir's Secret-Sharing for Mnemonic Codes, at satoshilabs/slips commit 78c87bc | §2.6 |
 | [BOLT 3](https://github.com/lightning/bolts/blob/444805d12ab98c30006173bb190cd9d6fce9e405/03-transactions.md) | Bitcoin Transaction and Script Formats, at lightning/bolts commit 444805d | §2.10 |
 | [Miniscript](https://github.com/sipa/miniscript/blob/6806dfb15a1fafabf7dd28aae3c9d2bc49db01f1/index.html) | Miniscript specification, published at bitcoin.sipa.be/miniscript; source at sipa/miniscript commit 6806dfb | §1.2 |
@@ -363,7 +363,8 @@ Newest first. Each entry links the commit that completed it; the full history is
 
 | Commit | Change |
 | :---- | :---- |
-| This revision | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
+| This revision | Citation labels now name what each specification defines. Removes the signing-protocol secret-sharing citation from the split-backup scenario; relabels BIP 11, BIP 65, BIP 112, BIP 382, and BIP 383 citations; cites BIP 341 and BIP 340 rather than BIP 342 for key-path cost; notes that RFC 9591's secp256k1 suite is not BIP 340-compatible; names the P2SH redeem script. |
+| [3c93c6e](https://github.com/johnzilla/notes/commit/3c93c6e) | Adds the consolidated references section with pinned versions, and moves revision notes from the metadata table into this changelog. |
 | [13d110e](https://github.com/johnzilla/notes/commit/13d110e) | Removes the document date. |
 | [254bd1c](https://github.com/johnzilla/notes/commit/254bd1c) | Adds §3.1 on deadlines, fee feasibility, and reorganizations; signing-device and supply-chain review in §1.2 and §3; and transaction- and service-level privacy in §5. |
 | [43a147d](https://github.com/johnzilla/notes/commit/43a147d) | Names split-secret forms and SLIP-39 in §2.6, and FROST and MuSig2 in §2.7. Splits signer freeze from platform freeze, adds account suspension to Scenario H, and renames the §1.3 exit column. |
