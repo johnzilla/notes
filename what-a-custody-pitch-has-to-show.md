@@ -6,7 +6,6 @@
 
 | Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
-| **Date** | 6 October 2026 |
 | **Audience** | Security researchers and technically competent reviewers assessing Bitcoin custody workflows. |
 | **Method** | Identify spending authority, trace the custody lifecycle, and distinguish protocol consequences from deployment claims requiring evidence. |
 | **Revision** | Corrects spending-path, timelock, threshold-signature, recovery, passphrase, and privacy claims. Adds a full single-signature baseline, account custody, escrow, channel settlement, lifecycle checks, and public technical references. |
@@ -310,7 +309,7 @@ For coercion, assess which signing material and approvals a person can access wi
 
 ## 7. Limits and source use
 
-The linked public specifications were consulted on 6 October 2026 and support the mechanisms discussed. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
+The linked public specifications support the mechanisms discussed. Links pinned to a commit identify the version consulted. They are not deployment attestations. Historical examples in a specification establish that a workflow is documented; they do not establish current adoption, implementation quality, or present-day relay behavior beyond the rule cited.
 
 This review framework does not supply incident likelihoods, legal classifications, insurance interpretations, or conclusions about an unnamed provider. It deliberately leaves implementation and organizational findings unresolved until evidence is inspected. A protocol-valid spend, operational independence, and successful account withdrawal are separate claims.
 
