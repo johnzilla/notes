@@ -1,10 +1,10 @@
 **CONFORMANCE NOTE  ·  PUBLIC SCENARIOS**
 
-**Assessing Bitcoin custody scenarios a pleb might encounter**
+**What A Bitcoin Custody Pitch Has To Show**
 
 *A claim-versus-artifact note. Patterns, not providers. No finding in this document is a statement about any firm's intent, solvency, or character.*
 
-| Document | 20261006-Multivendor-Multisig-ThreatModel.md |
+| Document | what-a-custody-pitch-has-to-show.md |
 | :---- | :---- |
 | **Date** | 6 October 2026 |
 | **Audience** | A new holder choosing among public pitches, and a security reviewer asked to look at one. A new holder can start at §1.3 and §6, and use the glossary in §1.2 for the rest. |
