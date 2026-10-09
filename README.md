@@ -14,6 +14,6 @@ A threat-model and evidence-review framework for Bitcoin custody arrangements, f
 
 *Questions to ask about a published file*
 
-**Version 0.2, peer review draft.** See the [changelog](what-can-you-check-about-a-release.md#changelog) for revisions.
+**Version 0.3, peer review draft.** See the [changelog](what-can-you-check-about-a-release.md#changelog) for revisions.
 
 A comparison of software release processes, for people deciding what a download page is evidence of and for technical reviewers. It opens with a plain-language Start here section. It separates three checks: whether a change was public, who signed the release file, and whether another builder rebuilt it. It reads Bitcoin Core's release process beside three other well-known processes: the Linux kernel, Tor Browser, and the Debian archive. For each, it records the signed object, where keys are published, where a rebuild sits in the process, and what the person who downloads checks. A side-by-side table puts the same questions to all four. A further section covers provenance records, such as signed hash files, build-information files, SLSA provenance, transparency logs, and timestamps, and maps each to the checks. Every figure is tied to the rule or listing it came from and the date it was read. The note compares processes and does not rank them: no organization is assessed.
