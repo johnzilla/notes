@@ -1,21 +1,23 @@
 # Style guide
 
-Rules for editing [Who Can Move Your Bitcoin?](who-can-move-your-bitcoin.md). They apply to every change, by any author. Check a change against this page before you commit it.
+Rules for editing the notes in this repository: [Who Can Move Your Bitcoin?](who-can-move-your-bitcoin.md) and [What Can You Check About a Software Release?](what-can-you-check-about-a-release.md). They apply to every change, by any author. Check a change against this page before you commit it.
+
+Section numbers in the rules, such as §1.1 and §8, refer to the custody note. Rules that differ for the release note are marked.
 
 ## Readers
 
-The document has two readers.
+Each note has two readers.
 
-- **People choosing how to hold bitcoin.** Most are not technical. They read "Start here."
-- **Technical reviewers.** They read the full document.
+- **People making a decision.** For the custody note, they are choosing how to hold bitcoin. For the release note, they are deciding what a download page is evidence of. Most are not technical. They read "Start here."
+- **Technical reviewers.** They read the full note.
 
 Write "Start here" and any plain-language text for the first reader. Write the technical sections for the second reader, and keep them as clear as the content allows.
 
 ## Content rules
 
-1. **No names.** Do not name products, companies, people, or specific incidents. Describe configurations, not providers.
+1. **No names.** Do not name products, companies, people, or specific incidents. Describe configurations, not providers. *Release note exception:* the release note names open-source projects, because it compares their public release processes. It still does not name companies, people, or incidents. It states what each project's public documents say, and it does not rank the projects.
 2. **Conditions, not verdicts.** State what a protocol does and what evidence a claim needs. Do not state that a product or design is safe or unsafe. Use only the result terms in §1.1.
-3. **Cite mechanism claims.** A statement about how a protocol or signature scheme works needs a public specification. Pin each source to a version in §8.
+3. **Cite mechanism claims.** A statement about how a protocol or signature scheme works needs a public specification. Pin each source to a version in the References section. Where a web page cannot be pinned, record the date it was read.
 4. **Label citations by what the source defines.** A link label names what the specification actually specifies. Do not label an opcode as a recovery mechanism, or an output type as an escrow protocol.
 5. **No frequency claims, in either direction.** Do not claim how often something fails without cited incident evidence. Do not treat a record without known failures as evidence of soundness.
 6. **Keep conditions with their claims.** If a claim holds "only if" something, keep the claim and the condition in one sentence or one table cell. A reader must not be able to quote the claim without its condition.
@@ -25,7 +27,7 @@ Write "Start here" and any plain-language text for the first reader. Write the t
 1. **Do not renumber.** Existing section and scenario numbers stay fixed, because reviewers cite them. Add new material inside an existing section, at the end of a list, or under an unnumbered heading.
 2. **Version every change.** Change the minor number when a claim, consequence, citation, or reader-facing text changes. Change the major number when numbering or structure changes in a way that breaks references. Typo-only edits do not change the version.
 3. **Record every version.** Add a changelog row that links the content commit. Tag the commit that contains the changelog row as `vX.Y`. Update the version line in the README.
-4. **Keep the filename.** The filename is `who-can-move-your-bitcoin.md`. It stays fixed, so links keep working. Versions before 0.18 used `what-a-custody-pitch-has-to-show.md`; their tags keep that name, and a short file at that path links to the current one.
+4. **Keep the filename.** The filenames are `who-can-move-your-bitcoin.md` and `what-can-you-check-about-a-release.md`. They stay fixed, so links keep working. Versions before 0.18 used `what-a-custody-pitch-has-to-show.md`; their tags keep that name, and a short file at that path links to the current one.
 
 ## Plain language
 
@@ -49,11 +51,23 @@ These rules follow Simplified Technical English (ASD-STE100) in part. They do no
 | **spending path** | One complete way to satisfy an output's spending conditions | route, branch, leaf (a leaf is a Taproot term; see §1.2) |
 | **freeze** | Signer freeze or platform freeze, as defined in §1.2 | lock, block (unless describing a timelock or a block in the chain) |
 
+**Release note terms**
+
+| Use | For | Do not use for the same thing |
+| :---- | :---- | :---- |
+| **release file** | The file a person downloads | artifact, download, package (unless a package in an archive is meant) |
+| **publisher** | The party that uploads the release file | vendor, maintainer (unless the source says maintainer) |
+| **builder** | A person or machine that compiles the stated source and records the output hashes | signer (the custody note uses "signer" for a component that holds a key), rebuilder (except for the Debian service, which uses that word) |
+| **attestation** | A signed statement about a file | signature (a signature is one part of an attestation) |
+| **downloader** | The person who downloads and checks a release file | user, customer |
+| **distributor** | A party that compiles another project's source and publishes the result | vendor, downstream |
+| **public, signed, rebuilt** | The three checks, as defined in the release note's §1.2 | reviewed (the note does not establish review), verified, reproducible (unless a source's own wording is quoted) |
+
 A term inside a quoted claim, such as "Multiple vendors or devices" in §6, keeps the claim's wording.
 
 ## Before you push
 
-- Every BIP or other specification cited in the text has a row in §8, and every "Cited in" entry matches the sections that cite it.
+- Every BIP or other source cited in the text has a row in the References section, and every "Cited in" entry matches the sections that cite it.
 - Every link in the Contents resolves to a heading.
 - Every new external link loads.
 - The changelog row, tag, and README version line match.
