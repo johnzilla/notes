@@ -6,7 +6,7 @@ This note compares release processes. It does not rank them.
 
 | Document | what-can-you-check-about-a-release.md |
 | :---- | :---- |
-| **Version** | 0.2 — peer review draft |
+| **Version** | 0.3 — peer review draft |
 | **Audience** | People deciding what a download page is evidence of: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Put the same questions to each process. Record a number with the listing or rule it came from, and with the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -47,8 +47,8 @@ This section is for anyone looking at a download page. You do not need to build 
 **The questions that matter.** Ask these questions about a release that you did not build. Ask them about a release that you did build, if you ask other people to run it.
 
 1. **Was the change public?** Find out if someone other than the author can read the diff that went into the file. A public repository or a mailed patch is evidence you can open. A change that appears only as a finished program is not that evidence. See [§2](#2-three-checks).
-2. **Who signed the file, and where did you get their key?** A signature tells you which key vouched for the file. Ask where the key is published. A key that you can get only from the download page adds little to the download page. See [§4.1](#41-comparison-by-step).
-3. **Did someone else rebuild it?** A second person who builds from the same source and gets the same hash gives you evidence about the build. One signature does not give you that evidence. See [§3](#3-public-records).
+2. **Who signed the file, and why do you believe the key is theirs?** A signature tells you which key vouched for the file. A key is only a file until you tie it to a person or a project. Ask what ties the key to the signer you expect. A fingerprint that you confirmed through a second channel is one answer. See [§2](#2-three-checks) and [§4.1](#41-comparison-by-step).
+3. **Did someone else rebuild it?** A second person can build from the same source and sign a report of the hash they got. A matching report is evidence about the build. The report is that person's statement, so check the signature on it. One signature on the file does not give you that evidence. See [§3](#3-public-records).
 4. **What object was signed?** A signature on a source archive vouches for the archive. A signature on a program vouches for the program. A company that builds the source later makes a new file with its own record. See [§4.1](#41-comparison-by-step).
 5. **What is the number counting?** A written rule can require a count before a file is published. A folder can show who vouched for one version. A dashboard can show a share of packages. Those numbers count different things. Count again the one you mean. See [§4.2](#42-what-a-number-is-evidence-of).
 6. **What do you check yourself?** Each process gives the person who downloads a different step to do. Ask what that step is and which keys it relies on. See [§4.1](#41-comparison-by-step).
@@ -57,7 +57,7 @@ This section is for anyone looking at a download page. You do not need to build 
 
 **Why the processes differ.** The projects publish different things. One publishes programs for several systems. One publishes source only. One publishes tens of thousands of packages. A step that fits one of them can have no meaning for another. A blank in the comparison is often a difference in what is published, not a missing step.
 
-**What this note does not do.** It does not rank projects. It does not say that more signatures make a better project. It does not compare how much review each project does. The right weight for each check depends on what you need the file to be evidence of.
+**What this note does not do.** It does not rank projects, and it does not compare how much review each project does. The right weight for each check depends on what you need the file to be evidence of.
 
 ## 1. What the note establishes
 
@@ -65,7 +65,7 @@ A release claim needs a defined object: a tag, a source archive, a binary, a has
 
 This note uses public documents and public listings. No private build machine, key ceremony, or unpublished configuration was inspected. Each consequence below is tied to the artifact named in the same paragraph.
 
-The note puts the same questions to four processes. The comparison shows where the processes make different decisions. It does not show that one decision is better. The four projects publish different objects, serve different readers, and work at different scales.
+The note puts the same questions to four processes. The comparison shows where the processes make different decisions. The four projects publish different objects, serve different readers, and work at different scales.
 
 ### 1.1 Evidence
 
@@ -84,8 +84,9 @@ The comparison in §4.1 uses two fixed entries beside the facts:
 | :---- | :---- |
 | **Release file** | The file a person downloads: a source archive, a binary, or a package. |
 | **Public** | The change is in a place where someone other than the author can read it. This check does not establish that anyone did read it, and the note does not grade review. |
-| **Signed** | A published key vouches for a named file. A signature identifies the key that signed. It does not establish that the file matches the source unless a separate check says so. |
-| **Rebuilt** | A builder other than the publisher started from the stated source and produced the same hash. Matching hashes are evidence about the build. They are not evidence about who read the commits. |
+| **Signed** | A published key vouches for a named file. A signature identifies the key that signed. It does not identify the key's holder; that needs key authentication (see below). It does not establish that the file matches the source unless a separate check says so. |
+| **Rebuilt** | A builder other than the publisher started from the stated source and produced the same hash. The public evidence is the builder's signed report of that result. A verified signature authenticates the report. It does not show, by itself, that a separate build took place. Matching reports are evidence about the build. They are not evidence about who read the commits. |
+| **Key retrieval and key authentication** | Retrieval is where a reader gets a key. Authentication is the reason a reader ties that key to the expected signer. They are separate steps. |
 | **Publisher** | The party that uploads the release file. |
 | **Builder** | A person or machine that compiles the stated source and records the hashes of the output. |
 | **Attestation** | A signed statement about a file. In §3.1 an attestation is a hash file with a builder's signature. |
@@ -93,24 +94,24 @@ The comparison in §4.1 uses two fixed entries beside the facts:
 | **Publish gate** | A written step that must be done before the file is uploaded. A document that calls a practice desirable is not a gate. A written gate is evidence of the stated process, not proof that each release followed it. |
 | **Distributor** | A party that compiles another project's source and publishes the result. That later compilation is a downstream build, and it has its own record. |
 | **Provenance record** | A statement about how a file was produced: the source, the builder, and the inputs. See [§5](#5-provenance-records). |
-| **Specification** | A document that says how software should behave. A specification is not a release file. See the paragraph below. |
-
-**Specifications and releases.** A Bitcoin Improvement Proposal (BIP) is a specification document. The BIP repository describes itself as "a publication medium and archive." It says that a published BIP "does not indicate that it is a good idea, has community consensus, or that it is about to be adopted." A BIP therefore answers a different question from any check in this note. A published BIP is evidence that a proposal was written down in public. It is not evidence that a release implements the proposal, or implements it correctly. A release record, in turn, says nothing about which specification the code follows. That link lives in the changes behind the release tag. The BIP process has no release file, no hash, and no rebuild, so this note does not list it as a record in §3. [BIP repository README](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/README.mediawiki), [BIP process (BIP 3)](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md)
+| **Specification** | A document that says how software should behave. A specification is not a release file. See [§7](#7-limits-and-source-use). |
 
 ## 2. Three checks
 
 | Check | Question | Artifact that answers it | What it does not answer |
 | :---- | :---- | :---- | :---- |
-| **Public** | Can someone other than the author read the diff? | A public repository history, a public pull request, or a mailed patch, tied to the tag the release names | Whether anyone read the diff, and whether the binary matches it |
-| **Signed** | Which key vouched for the file you downloaded? | A signature, the signed object, and a key obtained from a place other than the download page | Whether anyone else built the file |
-| **Rebuilt** | Did another builder produce the same hash from the stated source? | A second builder's signature over the same hash | Whether that builder read the commits, and whether the builders shared inputs |
+| **Public** | Can someone other than the author read the diff? | A public repository history, a public pull request, or a mailed patch, tied to the tag or commit that the release names | Whether anyone read the diff, and whether the binary matches it |
+| **Signed** | Which key vouched for the file you downloaded? | A signature, the signed object, and a reason to tie the key to the expected signer | Whether anyone else built the file |
+| **Rebuilt** | Did another builder produce the same hash from the stated source? | A second builder's signed report of the same hash, with the signature verified against that builder's key | Whether a separate build took place beyond the builder's report, whether that builder read the commits, and whether the builders shared inputs |
 
 A release can pass one check and not the others. Record which object you checked.
 
-Three points apply to every record in §3.
+Five points apply to every record in §3.
 
 - **A signed tag is a signature, not a review.** A signed tag shows which key named a commit as the release. The tag belongs to the signed check. The public check needs the history behind the tag.
 - **One signature can still be a complete record.** A release with a public history and one maintainer signature has two of the three checks. The rebuilt check stays open until a second builder publishes a matching hash. For a project that publishes source only, the rebuilt check is not applicable to the release file.
+- **A matching signature is a report.** A builder's signed hash file says: this key reports these hashes for this version. Verifying the signature authenticates the report. It does not show how the builder got the hashes. This note gives a provenance record the same treatment in [§5](#5-provenance-records): the record is its issuer's claim. Several reports from builders with separately authenticated keys are stronger evidence than one. They remain reports.
+- **Getting a key is not the same as authenticating it.** A key from a second website is not independent if the same party controls both sites. A key from the download page is useful if the reader confirmed its fingerprint elsewhere first. The question is why the reader ties the key to the expected signer. Cross-signatures from known keys, a fingerprint confirmed in person or through a second channel, and a key carried over from an earlier verified release are possible answers.
 - **Matching builders can share inputs.** Two builders who use the same prebuilt compiler packages have less independence than two builders who each build the compiler. A count of builders does not record that difference. Ask which inputs the builders had in common.
 
 The custody note in this repository lists four levels of build evidence: published source; a build reproducible from that source; independent parties who reproduced and attested the released binary; and evidence that a device runs that binary. See [Who Can Move Your Bitcoin? §3](who-can-move-your-bitcoin.md#3-review-the-complete-custody-lifecycle). The three checks here cover the first three levels. The fourth level, what a machine actually runs, is outside this note.
@@ -139,7 +140,7 @@ The custody note in this repository lists four levels of build evidence: publish
 - **What the downloader checks.** The verification document says: "you (the end user) decide which of these public keys you trust." The downloader checks the signatures on the hash file against the chosen keys, then compares the hash of the download with the hash file. A script, `verify.py`, does both steps. The downloader can set the trusted keys and a minimum number of good signatures.
 - **Timestamp.** The release process says the server "will automatically create an OpenTimestamps file and torrent of the directory." See [§5](#5-provenance-records).
 
-The 21 and the 19 are listings of who attested one tag. Neither number is a count of people who read the commits in the tag. The written gate is 6 or more matching builds.
+The 21 and the 19 are listings of who filed an attestation for one tag. Identical files show the same reported hashes. This note did not verify the signatures, so it does not show which keys made the reports. Neither number is a count of people who read the commits in the tag. The written gate is 6 or more matching builds.
 
 **Unresolved.** No Guix build was rerun for this note. No PGP signature in the folder was verified; the hash files were compared as files. The note did not establish which builders used substitutes. A later release will have a different folder.
 
@@ -187,7 +188,7 @@ The 21 and the 19 are listings of who attested one tag. Neither number is a coun
 
 A project signature answers who published the package. Signatures from builders on one hash file answer whether those builders report the same hashes. The design text states a requirement. The directory listing shows files for one release.
 
-**Unresolved.** No signature in the directory was verified for this note. The note did not establish which key made each signature, or whether the two named builders meet the design document's definition of different environments. The design document link returned a sign-in page on 9 October 2026, so its text was not reread for this version. The documents read do not say how a builder is added or which inputs builders share.
+**Unresolved.** The note did not read where the project ties a release to its source history. No signature in the directory was verified for this note. The note did not establish which key made each signature, or whether the two named builders meet the design document's definition of different environments. The design document link returned a sign-in page on 9 October 2026, so its text was not reread for this version. The documents read do not say how a builder is added or which inputs builders share.
 
 ### 3.4 Debian archive packages
 
@@ -209,7 +210,7 @@ A project signature answers who published the package. Signatures from builders 
 - **Signatures.** The manual page describes a chain. Package checksums go into a `Packages` file. Checksums of the `Packages` files go into a `Release` file. "The Release file is then signed by the archive key." The page also says: "apt-secure does not review signatures at a package level." The signed object is the archive index, not each package.
 - **What the downloader checks.** The package tool checks the signature on the `Release` file and follows the checksum chain to the package.
 
-**Unresolved.** The announcement itself was read only as the report quotes it. The front page of the rebuild service did not show figures in the form read, so this record has no count. The note did not read which architectures the migration rule covers, what exceptions exist, or where archive keys are published. No Debian package was rebuilt.
+**Unresolved.** The note did not read where the archive ties a binary package to its source history. The announcement itself was read only as the report quotes it. The front page of the rebuild service did not show figures in the form read, so this record has no count. The note did not read which architectures the migration rule covers, what exceptions exist, or where archive keys are published. No Debian package was rebuilt.
 
 ### 3.5 Debian test dashboard
 
@@ -234,17 +235,18 @@ A project signature answers who published the package. Signatures from builders 
 
 ### 4.1 Comparison by step
 
-Each row puts one question to all four processes. Read down a column to see one process. Read across a row to see a decision made four ways. The entries come from §3. "Not applicable" and "Not read for this note" have the meanings in [§1.1](#11-evidence).
+Each row puts one question to all four processes. Read down a column to see one process. Read across a row to see a decision made four ways. The entries come from §3. "Not applicable" and "Not read for this note" have the meanings in [§1.1](#11-evidence). A cell is a summary. The Unresolved line of each record in §3 states what the note did not check, including every signature named in this table.
 
 | Step | Bitcoin Core | Linux kernel | Tor Browser | Debian archive |
 | :---- | :---- | :---- | :---- | :---- |
 | **What the project publishes** | Binaries for several systems, built from a signed tag | A source archive | Binary packages for several systems | Binary packages in a distribution archive |
+| **Where the release ties to source history** | A signed tag, `v<version>`, in the public repository. Builders check out that tag. | Signed tags in the public git repositories | Not read for this note | Not read for this note |
 | **Object that is signed** | A hash file that lists every release file | The uncompressed source archive. Separately, a checksum file. Tags are also signed. | Each package file. Hash files for the build are also signed. | The archive's `Release` file, which leads by checksums to each package |
 | **Who signs** | Each builder who filed an attestation. Release-key holders add platform code signatures for Windows and macOS. | The developer who makes the release. A dedicated key on a separate system signs the checksum file. | The project's team key. Two further signature files on a hash file carry builder names. | The archive key |
-| **Where keys are published** | The `builder-keys` directory in the attestation repository | A Web Key Directory and a git repository of keys, with cross-signatures between developers | A Web Key Directory and a public key server | Not read for this note |
-| **Who decides which keys count** | The downloader chooses which builder keys to trust | The downloader, using the published fingerprints or the cross-signatures | The downloader, using the published fingerprint | Not read for this note |
-| **Rebuild in the written process** | Yes, before upload. The gate is 6 or more matching builds. | Not applicable. The release file is source. | Yes, in the design text: matching builds from at least two release engineers | Yes, after publication. A rebuild service rebuilds the distributed binary. |
-| **What a failed rebuild blocks** | Upload, under the written gate | Not applicable | Not read for this note | Migration of the package to *testing* |
+| **Where a reader retrieves keys** | The `builder-keys` directory in the attestation repository | A Web Key Directory and a git repository of keys, with cross-signatures between developers | A Web Key Directory and a public key server | Not read for this note |
+| **What the documents offer to authenticate a key** | The key directory in the attestation repository. The downloader chooses which builder keys to trust. | Cross-signatures between developers, and fingerprints on the signature page | A fingerprint on the verification page | Not read for this note |
+| **Rebuild in the written process** | Yes, before upload. The gate is 6 or more matching builds. | Not applicable. The release file is source. | Yes, in the design text as read for version 0.1: matching builds from at least two release engineers. The text was not reread for this version. | Yes, after publication. A rebuild service rebuilds the distributed binary. |
+| **What a failed rebuild blocks** | Upload, under the written gate | Not applicable | Not read for this note | Migration of the package to *testing*, as quoted in a report. The rule's exceptions and architecture scope were not read. |
 | **How a builder is added** | A pull request that adds a key | Not applicable | Not read for this note | The rebuild service asks for independent rebuilders |
 | **Inputs that builders share** | The Guix build definition. Each builder chooses prebuilt packages or a build from source. | Not applicable | Not read for this note | The original build's inputs, copied on purpose from the `.buildinfo` file |
 | **What the downloader checks** | Signatures on the hash file against chosen keys, then the hash of the download | The developer signature against the uncompressed archive | The team signature against the package | The `Release` signature and the checksum chain, done by the package tool |
@@ -257,11 +259,11 @@ Four differences explain most of the table.
 - **Before or after.** Bitcoin Core's written gate puts the rebuild before upload. Debian's rule acts after the first publication, at the move between suites.
 - **Many keys or one.** Bitcoin Core publishes many builder signatures and leaves the choice of keys to the downloader. The kernel and Tor Browser publish a signature from a developer key or a team key. Debian signs an index with an archive key.
 
-None of these differences is a score. Each one follows from what the project publishes and for whom.
+Each difference follows from what the project publishes and for whom.
 
 ### 4.2 What a number is evidence of
 
-Each figure below is a written rule or a listing read on 9 October 2026. None of them is a score, and no row is comparable with another row.
+Each figure below is a written rule or a listing read on 9 October 2026. The rows count different things, so no row is comparable with another row.
 
 | Figure | What was counted | Source | What it is not |
 | :---- | :---- | :---- | :---- |
@@ -285,11 +287,11 @@ A provenance record is a claim by whoever issued it. The record is as reliable a
 
 ### 5.1 Kinds of record
 
-**Signed hash file.** A builder lists the hashes of the build output and signs the list. Bitcoin Core's attestations take this form (§3.1), and the Tor Browser directory holds signed hash files (§3.3). The record says: this key reports these hashes for this version. The record carries little description of the build. The version in the folder name ties the record to a tag. When several builders sign the same hashes, the set of records answers the rebuilt check directly.
+**Signed hash file.** A builder lists the hashes of the build output and signs the list. Bitcoin Core's attestations take this form (§3.1), and the Tor Browser directory holds signed hash files (§3.3). The record says: this key reports these hashes for this version. The record carries little description of the build. The version in the folder name ties the record to a tag. When several builders sign the same hashes, the set of records is several reports of the same result. Each report is its builder's claim, in the same way that a provenance record is its issuer's claim. A reader who verifies the signatures has authenticated reports of a rebuild. That is the most direct public evidence for the rebuilt check in this note. It is not proof that separate builds took place.
 
 **Build-information file.** A file that records the conditions of a build so that another party can repeat it. Debian's rebuild service uses the `.buildinfo` file from the original build (§3.4). The record says: this build used these inputs. On its own, the file is the original builder's statement. The file becomes evidence about the build when a rebuilder uses it and gets the same binary.
 
-**SLSA provenance.** SLSA is a published framework for supply-chain records. It describes provenance as "the verifiable information about software artifacts describing where, when, and how something was produced." The record has a build definition, with the build type, the parameters, and the resolved dependencies. It also has run details, with an identifier for the builder. The framework's build levels describe how hard the record is to forge. At Build L1, the record "is trivial to bypass or forge." At Build L3, forging the record "requires exploiting a vulnerability." No level requires that a second party rebuild the file. A higher level is evidence about the build platform that issued the record. [SLSA provenance, version 1.2](https://slsa.dev/spec/v1.2/provenance), [SLSA build levels, version 1.2](https://slsa.dev/spec/v1.2/build-track-basics)
+**SLSA provenance.** SLSA is a published framework for supply-chain records. It describes provenance as "the verifiable information about software artifacts describing where, when, and how something was produced." The record has a build definition, with the build type, the parameters, and the resolved dependencies. It also has run details, with an identifier for the builder. The framework's build levels describe how hard the record is to forge. At Build L1, the record "is trivial to bypass or forge." At Build L3, forging the record "requires exploiting a vulnerability." From Build L2, the build platform must "generate and sign the provenance itself," and the consumer validates that the provenance is authentic. At Build L1, provenance "may be incomplete and/or unsigned." Signed provenance therefore ties a platform's statement to a file. No level requires that a second party rebuild the file. A higher level is evidence about the build platform that issued the record. [SLSA provenance, version 1.2](https://slsa.dev/spec/v1.2/provenance), [SLSA build levels, version 1.2](https://slsa.dev/spec/v1.2/build-track-basics)
 
 **in-toto attestation.** in-toto defines a general container for statements of this kind. It defines an attestation as "authenticated metadata about one or more software artifacts." A statement "binds the attestation to a particular subject" and names the type of the statement's content. An envelope carries the signature. SLSA provenance is one content type that the container can carry. The container says who signed a statement about which files. It does not say that the statement is true. [in-toto attestation framework, v1](https://github.com/in-toto/attestation/blob/main/spec/README.md)
 
@@ -302,10 +304,10 @@ A provenance record is a claim by whoever issued it. The record is as reliable a
 | Record | Who issues it | What it states | Check it helps answer | What it does not answer | Seen in §3 |
 | :---- | :---- | :---- | :---- | :---- | :---- |
 | **Signature on a release file** | The publisher | This key vouches for this file | Signed | How the file was built, and whether anyone else built it | §3.2, §3.3 |
-| **Signed hash file from a builder** | Each builder | This key reports these hashes for this version | Signed. Rebuilt, when several builders sign the same hashes. | Which inputs the builders shared | §3.1, §3.3 |
+| **Signed hash file from a builder** | Each builder | This key reports these hashes for this version | Signed. Rebuilt, as authenticated reports, when several builders sign the same hashes and the signatures are verified. | Whether separate builds took place, and which inputs the builders shared | §3.1, §3.3 |
 | **Signed archive index** | The archive | These package checksums belong to this archive state | Signed | Whether a package matches its source | §3.4 |
 | **Build-information file** | The original builder | This build used these inputs | Rebuilt, when a rebuilder uses the file and matches the binary | Whether different inputs give the same binary | §3.4 |
-| **SLSA provenance** | A build platform | This platform ran this build definition on these inputs | Neither signed nor rebuilt. It answers how the file was produced. | Whether a second party can produce the same file | Not found in the documents read |
+| **SLSA provenance** | A build platform | This platform ran this build definition on these inputs | Signed, from Build L2, where the build platform signs its own statement about the file. Not rebuilt. The record mainly answers how the file was produced. | Whether a second party can produce the same file | Not found in the documents read |
 | **in-toto attestation** | Any key holder | A signed statement of a named type about named files | Depends on the statement it carries | Whether the statement is true | Not found in the documents read |
 | **Transparency log entry** | A log operator | This signed statement was recorded at this position in the log | Signed, by making signatures public | Whether the signed file is correct | Not found in the documents read |
 | **Timestamp** | A timestamp service | This data existed before this time | None of the three. It dates a record. | Who built the data, and from what | §3.1 |
@@ -313,7 +315,7 @@ A provenance record is a claim by whoever issued it. The record is as reliable a
 
 "Not found in the documents read" is a statement about the documents listed in §8. It is not a statement that a project does not publish such a record.
 
-A process can answer the rebuilt check without any provenance format. Signed hash files from several builders do that. A process can also publish detailed provenance and leave the rebuilt check open. The two kinds of evidence do not replace each other.
+A process can give evidence for the rebuilt check without any provenance format. Verified signed hash files from several builders do that. A process can also publish signed provenance and leave the rebuilt check open. The two kinds of evidence do not replace each other. Both are statements by the party that signed them.
 
 ## 6. Questions that make a claim reviewable
 
@@ -321,20 +323,20 @@ A process can answer the rebuilt check without any provenance format. Signed has
 | :---- | :---- | :---- |
 | **The source is open** | The tag or commit that the release file says it was built from, and the public history behind that tag | The license does not identify the file you downloaded |
 | **The change was reviewed** | The public place where the change was discussed, tied to the tag. The public check in §2 shows only that the change could be read. | A public repository is not a record of who read a change |
-| **It is signed** | The signature, the object it covers, and a place to get the key that is not the download page | A download button is not a signature |
-| **Anyone can reproduce it** | A second builder's signature over the same hash, or a public rebuild result for that file | A build document is not a second build |
+| **It is signed** | The signature, the object it covers, and the reason to tie the key to the expected signer | A download button is not a signature, and a key is not yet an identity |
+| **Anyone can reproduce it** | A second builder's signed report of the same hash, with a key you can authenticate, or a public rebuild result for that file | A build document is not a second build |
 | **Several people signed the release** | The directory or signature file, and whether each signature covers the same hash | A contributor list is not a set of attestations |
 | **The builders are independent** | Which machines, networks, and prebuilt inputs the builders had in common | A count of builders does not record what they shared |
 | **Releases wait for matching builds** | The written step, and the listing for the release you mean | A written gate is not a record of one release |
 | **The operating system is reproducible** | The record for the binary you run, not only for the upstream source archive | An upstream signature does not cover a later compilation |
 | **This percentage is reproducible** | The suite, the architecture, the date, and what the figure counts: test builds, distributed binaries, or builders | A dashboard for one suite is not an attestation for one file |
 | **We publish provenance** | The record, who issued it, and whether anyone other than the issuer rebuilt the file | A provenance record is the issuer's statement about its own build |
-| **It follows the specification** | The changes behind the release tag that implement the specification, and the tests | A published specification is not a release record (§1.2) |
-| **You can verify it yourself** | The exact step for the person who downloads, and the keys that step relies on | A verification page that fetches its key from the download site adds little to the download site |
+| **It follows the specification** | The changes behind the release tag that implement the specification, and the tests | A published specification is not a release record (§7) |
+| **You can verify it yourself** | The exact step for the person who downloads, the keys that step relies on, and how the reader authenticates those keys | A verification step is as strong as the reader's reason to trust the key |
 
 ## 7. Limits and source use
 
-- This note is a comparison of written processes and public listings. It is not a threat model for any project, and it does not assess the security of any project.
+- This note compares written processes and public listings. It is not a threat model, and it does not assess the security of any project.
 - Review is out of scope. The public check shows that a change can be read. No record here shows how much review a change received, and the note does not compare review between projects.
 - The four projects publish different objects. An entry of "Not applicable" in §4.1 follows from what a project publishes. An entry of "Not read for this note" is a limit of this note.
 - A builder who attests a tag did not necessarily read the commits in the tag. A person who read the commits did not necessarily rebuild the release.
@@ -342,7 +344,8 @@ A process can answer the rebuilt check without any provenance format. Signed has
 - A written gate describes the process. The listing for one release shows what was filed for that release. Read both.
 - The binary a machine boots, a phone image, and a container build are downstream builds with their own records. Signing-device firmware is out of scope and will be treated separately.
 - A quote from a pinned source is the text at the commit given in §8. A quote from an unpinned page is the text as read on the date given. If the page changes, the quote can change with it.
-- No organization is assessed. A missing artifact means only that this note does not show the claim.
+- A specification is not a release. A Bitcoin Improvement Proposal (BIP) is a specification document. The BIP repository says that a published BIP "does not indicate that it is a good idea, has community consensus, or that it is about to be adopted." A published BIP is evidence that a proposal was written down in public. It is not evidence that a release implements the proposal. The BIP process has no release file, hash, or rebuild, so §3 has no record for it. [BIP repository README](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/README.mediawiki), [BIP process (BIP 3)](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md)
+- A missing artifact means only that this note does not show the claim.
 
 ## 8. References
 
@@ -363,8 +366,8 @@ Each source is listed once with the version or date consulted and the sections t
 
 | Reference | What it defines | Cited in |
 | :---- | :---- | :---- |
-| [README.mediawiki](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/README.mediawiki) | What publication of a BIP indicates | §1.2 |
-| [BIP 3](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md) | Updated BIP Process | §1.2 |
+| [README.mediawiki](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/README.mediawiki) | What publication of a BIP indicates | §7 |
+| [BIP 3](https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md) | Updated BIP Process | §7 |
 
 **Other sources**, read 9 October 2026 unless a version is given. These pages are not pinned to a commit.
 
@@ -383,7 +386,7 @@ Each source is listed once with the version or date consulted and the sections t
 | [Debian test dashboard, forky/amd64](https://tests.reproducible-builds.org/debian/forky/index_suite_amd64_stats.html) | The share of packages whose two test builds match | §3.5, §4.2 |
 | [Debian test variations](https://tests.reproducible-builds.org/debian/index_variations.html) | What differs between the two test builds | §3.5 |
 | [SLSA provenance, version 1.2](https://slsa.dev/spec/v1.2/provenance) | The provenance record and its fields | §5.1 |
-| [SLSA build levels, version 1.2](https://slsa.dev/spec/v1.2/build-track-basics) | Build levels L1 to L3 | §5.1 |
+| [SLSA build levels, version 1.2](https://slsa.dev/spec/v1.2/build-track-basics) | Build levels L1 to L3, and which levels require signed provenance | §5.1, §5.2 |
 | [in-toto attestation framework, v1](https://github.com/in-toto/attestation/blob/main/spec/README.md) | Statement, predicate, envelope, and bundle | §5.1 |
 | [Sigstore log overview](https://docs.sigstore.dev/logging/overview/) | The Rekor transparency log | §5.1 |
 | [OpenTimestamps](https://opentimestamps.org/) | What a timestamp proves | §5.1 |
@@ -394,5 +397,6 @@ Newest first. Versioning follows [STYLE.md](STYLE.md): the minor number changes 
 
 | Version | Change |
 | :---- | :---- |
+| 0.3 — 9 October 2026 | Review fixes. Treats a builder's signed hash file as the builder's report, in the same way as a provenance record: §1.2, §2, §3.1, §5.1, §5.2, and §6 no longer say that matching signatures answer the rebuilt check by themselves. Separates key retrieval from key authentication in §1.2, §2, §4.1, and §6. Corrects the SLSA row in §5.2: provenance is signed by the build platform from Build L2. Adds a §4.1 row for where each release ties to its source history. Carries the Tor Browser and Debian limits into the §4.1 cells. Moves the BIP paragraph from §1.2 to §7 and shortens it. Removes repeated statements that the note does not rank. |
 | 0.2 — 9 October 2026 | Reframed as a comparison of release processes. Renames the "reviewed" check to "public" and states that the note does not establish review. Adds a step-by-step comparison of the four processes (§4.1), with "Not applicable" and "Not read for this note" as fixed entries. Adds a provenance section with a mapping table (§5). Adds the downloader's step, key publication, and shared build inputs to each record. Adds a paragraph that separates a specification, such as a BIP, from a release. Splits the Debian record: the migration rule and its rebuild service (§3.4), and the test dashboard (§3.5). Corrects the dashboard link and reads the figure as 37,827 packages, 95.8%. Splits the Bitcoin Core listing into 21 first-stage and 19 second-stage attestations and records that each set matches. Records that the kernel signature covers the uncompressed archive and that a signed checksum file exists. Adds a release directory listing to the Tor Browser record. Moves the maintainer-signed release from §3.5 into §2. Pins Bitcoin Core sources to commits and adds "Cited in" to the references. Renumbers: Questions is §6, Limits is §7, References is §8. |
 | 0.1 — 9 October 2026 | Peer review draft. Three checks. Public records for Bitcoin Core release binaries, kernel.org source archives, Tor Browser design notes, the Debian forky migration rule, and a maintainer-signed release. Figures dated to the listing that was read. |
