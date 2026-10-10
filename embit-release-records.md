@@ -6,7 +6,7 @@ This note applies [What Can You Check About a Software Release?](what-can-you-ch
 
 | Document | embit-release-records.md |
 | :---- | :---- |
-| **Version** | 0.3 — peer review draft |
+| **Version** | 0.4 — peer review draft |
 | **Audience** | People who install embit or depend on a project that does: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | The method of the release note, version 0.3. Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Record a figure with the listing it came from and the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -24,6 +24,7 @@ This note applies [What Can You Check About a Software Release?](what-can-you-ch
   - [3.2 The 0.8.1 and 0.8.2 tags](#32-the-081-and-082-tags)
   - [3.3 The written release process](#33-the-written-release-process)
   - [3.4 The release run for 0.8.2](#34-the-release-run-for-082)
+  - [3.5 Two implementations in one release](#35-two-implementations-in-one-release)
 - [4. The three checks, by object](#4-the-three-checks-by-object)
 - [5. Beside the four processes](#5-beside-the-four-processes)
 - [6. Downstream copies](#6-downstream-copies)
@@ -52,6 +53,8 @@ The library is between two ways of publishing. The file on PyPI comes from the e
 - **If you copy from the source repository.** Verify the signature on the tag. A signature shows which key vouched for the tag. First decide why you believe that key belongs to the project.
 
 **How to judge an answer.** A good answer shows you something you can open. A weak answer repeats the claim in different words. A weak answer does not prove a problem. It shows that the claim is not proved yet.
+
+**One thing a release record cannot show.** embit holds two versions of its core signing code. One calls a widely used native library. The other is written in Python and takes over when the native library does not load. The release file holds both. It does not tell you which one runs on your machine. See [§3.5](#35-two-implementations-in-one-release).
 
 **What this note does not do.** It does not say whether embit is safe to use, and it does not compare embit with other libraries.
 
@@ -198,6 +201,35 @@ A cancelled run is a different fact from a failed check. The record shows that s
 
 **Unresolved.** The reason for the cancellation was not read. The note did not read whether a later release is planned through this workflow.
 
+### 3.5 Two implementations in one release
+
+**Claim.** An embit release holds two implementations of its secp256k1 operations: bindings to a native `libsecp256k1`, and a pure-Python implementation. The library chooses between them when it is imported. The release record does not determine which one runs.
+
+**Object and date.** The source trees at tags `v0.8.0` and `v0.8.2`, the project README at both tags, and the origin file in the Bitcoin Core repository at commit `4bacf21`, read 9 October 2026. Pull request 135 in the embit repository, read the same day.
+
+**Public source.** `src/embit/util/secp256k1.py`, `src/embit/util/py_secp256k1.py`, `src/embit/util/key.py`, and `README.md` in the `diybitcoinhardware/embit` repository. `test/functional/test_framework/key.py` in the Bitcoin Core repository.
+
+**What was read.** The selection code. The header and the signing, nonce, and key-generation functions of the pure-Python implementation. The README text on backends. The header of the origin file. The title, description, and review comments of pull request 135.
+
+**Result.**
+
+- **Selection.** `util/secp256k1.py` tries the MicroPython `secp256k1` module, then the ctypes bindings, then the pure-Python module. Each step sits inside a bare `except:` clause, so any error in a step moves to the next one. The files read contain no warning or log line at that point, and no function that reports which implementation was chosen.
+- **Per-function selection.** At `v0.8.2`, when the loaded native library lacks an optional symbol, the library takes that one function from the pure-Python module and keeps the native library for the rest. One process can therefore use both implementations.
+- **The documents state the behavior.** The README at `v0.8.2` says: "If no compatible system library is available, `embit` automatically falls back to the pure Python implementation." The README at `v0.8.0` says the same of the prebuilt and system libraries.
+- **Effect of the pure-Python rule.** Under the rule in §3.3, a published file holds no native library. A person who installs such a file on a machine without a system `libsecp256k1` gets the pure-Python implementation. The 0.8.0 file holds prebuilt libraries for seven platform targets, so on those targets it loads a native library first.
+- **Origin of the pure-Python code.** `util/key.py` begins: "Copy-paste from key.py in bitcoin test_framework." The origin file in Bitcoin Core describes itself as a "Test-only secp256k1 elliptic curve protocols implementation" and carries this warning: "This code is slow, uses bad randomness, does not properly protect keys, and is trivially vulnerable to side channel attacks. Do not use for anything but tests." The embit copy does not carry that warning.
+- **Nonces.** In the pure-Python implementation, ECDSA signing derives its nonce with a function labeled RFC 6979 unless the caller supplies one, and Schnorr signing derives its nonce with the BIP 340 tagged hash. Signing does not draw on a random number generator.
+- **Key generation.** `util/key.py` has a `generate_privkey()` function that uses Python's `random` module. No caller of that function was found in the library's own source at `v0.8.2`. The library's general random helpers in `misc.py` use `os.urandom`.
+- **Context randomization.** `context_randomize()` in the pure-Python module has an empty body. In the native bindings, the same call passes 32 random bytes to the native library.
+- **The project's open change.** Pull request 135, opened in June 2026, deletes the pure-Python module and makes import fail when no native library loads. Its description gives two reasons: the two implementations return different results at some call sites, and "Maintaining two implementations of the same primitives is not sustainable." One reviewer reported a tested approval. The change was not merged on the date read.
+- **A downstream check.** One downstream project checks its built image for the native library and for the absence of the pure-Python module (§6).
+
+Two implementations in one file is a release fact: a reader who has verified the file has not yet learned which code runs. The custody note calls this the fourth level of build evidence, "evidence that the device runs that binary." See [Who Can Move Your Bitcoin? §3](who-can-move-your-bitcoin.md#3-review-the-complete-custody-lifecycle).
+
+This record quotes what the files say about themselves. It does not assess whether the pure-Python implementation is fit for a given use.
+
+**Unresolved.** The note did not test which implementation loads on any platform. It did not measure the pure-Python implementation for timing behavior, and it did not compare the embit copy with the origin file line by line. It did not read which implementation any downstream project runs, beyond the check in §6. The note did not read the MicroPython `secp256k1` module.
+
 ## 4. The three checks, by object
 
 | Check | The 0.8.0 file on PyPI | Tags `v0.8.1` and `v0.8.2` |
@@ -251,6 +283,7 @@ The claims are from the [release note §6](what-can-you-check-about-a-release.md
 | **We publish provenance** | Separate build-provenance steps and PyPI attestations enabled in the workflow. The cancelled run produced neither. | The attestation for a published file, and who issued it |
 | **Releases follow the written process** | The process, and one cancelled run. The workflow has no release-page upload step. | A completed publishing run and evidence that the release-page files and post-publish checks satisfy the written process |
 | **The artifacts are pure Python** | No `.so`, `.dll`, or `.dylib` files were found in the source trees at `v0.8.1` and `v0.8.2`. The 0.8.0 file on PyPI predates the rule and holds seven prebuilt libraries. | A published file built under the rule |
+| **It uses libsecp256k1** | Bindings to a native library, with a pure-Python implementation that takes over without a signal when the native one does not load (§3.5) | Evidence of which implementation loaded in the build you run, such as an import that fails without the native library, or a check of the built image |
 | **You can verify it yourself** | A hash comparison for the PyPI file. A tag signature for the repository. | A verification step for a release file that names a key |
 
 A missing artifact means only that this note does not show the claim.
@@ -264,6 +297,7 @@ A missing artifact means only that this note does not show the claim.
 - Figures from PyPI are as read on 9 October 2026. For version 0.3, the JSON record was reread, and the archive was downloaded, hashed, and recounted. Shared regular-file contents were compared with the generated source archive for commit `84cce66`. This was a file comparison, not a reproducible build or local verification of the commit signature.
 - Quotes from the repository are the text at commit `2b375a3`.
 - Signing-device firmware and wallet images are out of scope. §6 names two downstream projects only to show which object each one pins.
+- A release record describes a file. It does not show which code path runs after installation. §3.5 records that the file holds two implementations and quotes their own descriptions. It is not a review of either one.
 - A missing artifact means only that this note does not show the claim.
 
 ## 9. References
@@ -279,6 +313,12 @@ Each source is listed once with the version or date consulted and the sections t
 | [docs/package-content-policy.md](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/docs/package-content-policy.md) | What a published file may contain | §3.3 |
 | [.github/workflows/release.yml](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/.github/workflows/release.yml) | The release workflow | §3.3, §3.4 |
 | [CHANGELOG.md](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/CHANGELOG.md) | Changes in 0.8.1 and 0.8.2 | §2, §3.2 |
+| [util/secp256k1.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/secp256k1.py) | Selection between implementations | §3.5 |
+| [util/py_secp256k1.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/py_secp256k1.py) | The pure-Python module | §3.5 |
+| [util/key.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/key.py) | Pure-Python signing, nonce, and key-generation functions, and the stated origin | §3.5 |
+| [README.md at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/README.md) | The documented backend order and fallback | §3.5 |
+| [README.md at v0.8.0](https://github.com/diybitcoinhardware/embit/blob/84cce66fb831fa6d625fb73f28e03605f3c04e28/README.md) | The documented fallback for the 0.8.0 file | §3.5 |
+| [Pull request 135](https://github.com/diybitcoinhardware/embit/pull/135) | The open change that removes the pure-Python module, read 9 October 2026 | §3.5 |
 | [Source tree for v0.8.0](https://github.com/diybitcoinhardware/embit/tree/84cce66fb831fa6d625fb73f28e03605f3c04e28) | Commit `84cce66` and its source tree | §3.1 |
 | [Source tree for v0.8.1](https://github.com/diybitcoinhardware/embit/tree/b5d694a79790c502f7725781332aa33d26a5486d) | Commit `b5d694a` and its source tree | §3.2 |
 | [Source tree for v0.8.2](https://github.com/diybitcoinhardware/embit/tree/eb6104fd85d3becabba628756cd5e1b75619f3a1) | Commit `eb6104f` and its source tree | §3.2, §6 |
@@ -310,6 +350,12 @@ Each source is listed once with the version or date consulted and the sections t
 | [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) | The Trusted Publisher feature | §1.2 |
 | [Attestations](https://docs.pypi.org/attestations/) | PyPI attestations | §1.2 |
 
+**Bitcoin Core**, at [bitcoin/bitcoin commit 4bacf21](https://github.com/bitcoin/bitcoin/tree/4bacf21a13c2ed25ef9362ca38f26bf0a67d22c9).
+
+| Reference | What it defines | Cited in |
+| :---- | :---- | :---- |
+| [test/functional/test_framework/key.py](https://github.com/bitcoin/bitcoin/blob/4bacf21a13c2ed25ef9362ca38f26bf0a67d22c9/test/functional/test_framework/key.py) | The origin file and its test-only warning | §3.5 |
+
 **Downstream projects**
 
 | Reference | What it defines | Cited in |
@@ -325,6 +371,7 @@ Newest first. Versioning follows [STYLE.md](STYLE.md). This note uses the tag pr
 
 | Version | Change |
 | :---- | :---- |
+| 0.4 — 9 October 2026 | Adds §3.5: the release holds a native binding and a pure-Python implementation of its secp256k1 operations, chosen at import without a signal. Records the selection code, the documented fallback, the stated origin of the pure-Python code and the warning in the origin file, how nonces are derived, and the open change that removes the pure-Python module. Adds a Start here paragraph, a §7 row, and a §8 limit. |
 | 0.3 — 9 October 2026 | [Content commit](https://github.com/johnzilla/notes/commit/f37d48000029f72cc52c76d0098ff3a9729e85b1). Records the byte-for-byte match of all 60 regular files shared by the 0.8.0 PyPI archive and tagged tree, including the seven native libraries, and identifies seven additional packaging files (§3.1). Keeps native-library build provenance and regeneration of packaging metadata unresolved. Corrects fingerprint retrieval versus public-key retrieval and local verification (§3.2, §4, §5). Records both signed tag-object IDs and distinguishes generated source archives from project-built distributions. Separates workflow output destinations, records the missing release-page upload step, and confirms that the pinned publishing action enables PyPI attestations separately from the build-provenance steps (§3.3). Pins the cancelled run and attempt, names its cancelled smoke-install step (§3.4), and narrows the downstream script's checks to what it performs (§6). Updates the claims table, source-use limits, references, and README. Version tag: `embit-v0.3`. |
 | 0.2 — 9 October 2026 | Restructured to match the other notes: Start here, contents, numbered records, references pinned to commits. Reframed around the change between two release processes (§2). Removes the names of people. Adds that the commit behind tag `v0.8.0` is signed; that PyPI did not accept PGP signatures at the upload date; that the prebuilt libraries are in the public source tree at `v0.8.0` and were removed by a recorded commit before 0.8.1; that the release page lists two generated source archives; and that a maintainer account cancelled the release run. Closes three unresolved items: the ancestry of the 0.8.2 commit, the submodule commit, and whether 0.8.0 was uploaded through a Trusted Publisher. Adds the security policy and the package content policy as sources. Records that one downstream project pins the 0.8.2 commit and that another checks the library in its built image. Removes the table of counts. |
 | 0.1 — 9 October 2026 | First draft, read against release note 0.3. Records for the PyPI file and the later tag, the six questions, a table of counts, a comparison column, downstream pointers, and a claims table. |
