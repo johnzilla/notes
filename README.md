@@ -14,7 +14,7 @@ A threat-model and evidence-review framework for Bitcoin custody arrangements, f
 
 *Questions to ask about a published file*
 
-**Version 0.3, peer review draft.** See the [changelog](what-can-you-check-about-a-release.md#changelog) for revisions.
+**Version 0.4, peer review draft.** See the [changelog](what-can-you-check-about-a-release.md#changelog) for revisions.
 
 A comparison of software release processes, for people deciding what a download page is evidence of and for technical reviewers. It opens with a plain-language Start here section. It separates three checks: whether a change was public, who signed the release file, and whether another builder rebuilt it. It reads Bitcoin Core's release process beside three other well-known processes: the Linux kernel, Tor Browser, and the Debian archive. For each, it records the signed object, where keys are published, where a rebuild sits in the process, and what the person who downloads checks. A side-by-side table puts the same questions to all four. A further section covers provenance records, such as signed hash files, build-information files, SLSA provenance, transparency logs, and timestamps, and maps each to the checks. Every figure is tied to the rule or listing it came from and the date it was read. The note compares processes and does not rank them: no organization is assessed.
 
@@ -30,6 +30,6 @@ A worked example of the release note's method, applied to embit, a Bitcoin libra
 
 *Questions to ask when software has more than one way to do a job*
 
-**Version 0.1, peer review draft.** See the [changelog](which-code-actually-runs.md#changelog) for revisions.
+**Version 0.2, peer review draft.** See the [changelog](which-code-actually-runs.md#changelog) for revisions.
 
 A note on fallbacks in software that makes or uses keys, for people who rely on such software and for technical reviewers. It opens with a plain-language Start here section. It defines a fallback, the selection between two ways to do a job, and the difference between code that is present and code that is reached. It describes four kinds of fallback and what a reader could inspect for each. It reads two public records: the random source for seeds in Coldcard firmware, from the maker's account and one independent analysis, and the secp256k1 implementation in the embit library. A table sets out what separates the two records, so that no conclusion carries from one to the other. It ends with the controls a project can show, each paired with the artifact that lets a reader check it, and with questions that make a claim reviewable. It makes no claim about how common the pattern is, and no organization is assessed.

@@ -6,7 +6,7 @@ This note compares release processes. It does not rank them.
 
 | Document | what-can-you-check-about-a-release.md |
 | :---- | :---- |
-| **Version** | 0.3 — peer review draft |
+| **Version** | 0.4 — peer review draft |
 | **Audience** | People deciding what a download page is evidence of: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Put the same questions to each process. Record a number with the listing or rule it came from, and with the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -106,12 +106,13 @@ The comparison in §4.1 uses two fixed entries beside the facts:
 
 A release can pass one check and not the others. Record which object you checked.
 
-Five points apply to every record in §3.
+Six points apply to every record in §3.
 
 - **A signed tag is a signature, not a review.** A signed tag shows which key named a commit as the release. The tag belongs to the signed check. The public check needs the history behind the tag.
 - **One signature can still be a complete record.** A release with a public history and one maintainer signature has two of the three checks. The rebuilt check stays open until a second builder publishes a matching hash. For a project that publishes source only, the rebuilt check is not applicable to the release file.
 - **A matching signature is a report.** A builder's signed hash file says: this key reports these hashes for this version. Verifying the signature authenticates the report. It does not show how the builder got the hashes. This note gives a provenance record the same treatment in [§5](#5-provenance-records): the record is its issuer's claim. Several reports from builders with separately authenticated keys are stronger evidence than one. They remain reports.
 - **Getting a key is not the same as authenticating it.** A key from a second website is not independent if the same party controls both sites. A key from the download page is useful if the reader confirmed its fingerprint elsewhere first. The question is why the reader ties the key to the expected signer. Cross-signatures from known keys, a fingerprint confirmed in person or through a second channel, and a key carried over from an earlier verified release are possible answers.
+- **No check shows which path inside the file runs.** A file can contain two ways to do one job, and the source or the build configuration can select the weaker one. A matching rebuild then reproduces that selection, and a signature vouches for a file that contains it. See [Which Code Actually Runs?](which-code-actually-runs.md).
 - **Matching builders can share inputs.** Two builders who use the same prebuilt compiler packages have less independence than two builders who each build the compiler. A count of builders does not record that difference. Ask which inputs the builders had in common.
 
 The custody note in this repository lists four levels of build evidence: published source; a build reproducible from that source; independent parties who reproduced and attested the released binary; and evidence that a device runs that binary. See [Who Can Move Your Bitcoin? §3](who-can-move-your-bitcoin.md#3-review-the-complete-custody-lifecycle). The three checks here cover the first three levels. The fourth level, what a machine actually runs, is outside this note.
@@ -332,6 +333,7 @@ A process can give evidence for the rebuilt check without any provenance format.
 | **This percentage is reproducible** | The suite, the architecture, the date, and what the figure counts: test builds, distributed binaries, or builders | A dashboard for one suite is not an attestation for one file |
 | **We publish provenance** | The record, who issued it, and whether anyone other than the issuer rebuilt the file | A provenance record is the issuer's statement about its own build |
 | **It follows the specification** | The changes behind the release tag that implement the specification, and the tests | A published specification is not a release record (§7) |
+| **The build is reproducible, so the code is verified** | What the rebuild compared, and what shows that the source selects the intended code path | A matching hash shows that the binary matches the source. It does not show what the source does. |
 | **You can verify it yourself** | The exact step for the person who downloads, the keys that step relies on, and how the reader authenticates those keys | A verification step is as strong as the reader's reason to trust the key |
 
 ## 7. Limits and source use
@@ -397,6 +399,7 @@ Newest first. Versioning follows [STYLE.md](STYLE.md): the minor number changes 
 
 | Version | Change |
 | :---- | :---- |
+| 0.4 — 9 October 2026 | Adds a sixth point to §2: no check shows which path inside a file runs, and a matching rebuild reproduces a fallback that the source selects. Adds a §6 row for the claim that a reproducible build means the code is verified. Links to the fallback note. |
 | 0.3 — 9 October 2026 | Review fixes. Treats a builder's signed hash file as the builder's report, in the same way as a provenance record: §1.2, §2, §3.1, §5.1, §5.2, and §6 no longer say that matching signatures answer the rebuilt check by themselves. Separates key retrieval from key authentication in §1.2, §2, §4.1, and §6. Corrects the SLSA row in §5.2: provenance is signed by the build platform from Build L2. Adds a §4.1 row for where each release ties to its source history. Carries the Tor Browser and Debian limits into the §4.1 cells. Moves the BIP paragraph from §1.2 to §7 and shortens it. Removes repeated statements that the note does not rank. |
 | 0.2 — 9 October 2026 | Reframed as a comparison of release processes. Renames the "reviewed" check to "public" and states that the note does not establish review. Adds a step-by-step comparison of the four processes (§4.1), with "Not applicable" and "Not read for this note" as fixed entries. Adds a provenance section with a mapping table (§5). Adds the downloader's step, key publication, and shared build inputs to each record. Adds a paragraph that separates a specification, such as a BIP, from a release. Splits the Debian record: the migration rule and its rebuild service (§3.4), and the test dashboard (§3.5). Corrects the dashboard link and reads the figure as 37,827 packages, 95.8%. Splits the Bitcoin Core listing into 21 first-stage and 19 second-stage attestations and records that each set matches. Records that the kernel signature covers the uncompressed archive and that a signed checksum file exists. Adds a release directory listing to the Tor Browser record. Moves the maintainer-signed release from §3.5 into §2. Pins Bitcoin Core sources to commits and adds "Cited in" to the references. Renumbers: Questions is §6, Limits is §7, References is §8. |
 | 0.1 — 9 October 2026 | Peer review draft. Three checks. Public records for Bitcoin Core release binaries, kernel.org source archives, Tor Browser design notes, the Debian forky migration rule, and a maintainer-signed release. Figures dated to the listing that was read. |
