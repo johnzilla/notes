@@ -6,7 +6,7 @@ This note applies [What Can You Check About a Software Release?](what-can-you-ch
 
 | Document | embit-release-records.md |
 | :---- | :---- |
-| **Version** | 0.5 — peer review draft |
+| **Version** | 0.6 — peer review draft |
 | **Audience** | People who install embit or depend on a project that does: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | The method of the release note, version 0.3. Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Record a figure with the listing it came from and the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -219,7 +219,7 @@ A cancelled run is a different fact from a failed check. The record shows that s
 - **Effect of the pure-Python rule.** Under the rule in §3.3, a published file holds no native library. At `v0.8.2`, the ctypes loader searches repository-local paths, system libraries, and in-tree prebuilt paths. Absence of a system library alone does not establish which implementation loads. If neither the MicroPython path nor the ctypes path succeeds, the selector attempts the pure-Python import. The 0.8.0 file holds prebuilt libraries for seven platform targets and attempts to load the matching file before falling back. A matching platform name does not guarantee successful loading.
 - **Origin of the pure-Python code.** `util/key.py` begins: "Copy-paste from key.py in bitcoin test_framework." The upstream counterpart at Bitcoin Core commit `4bacf21` describes itself as a "Test-only secp256k1 elliptic curve protocols implementation" and carries this warning: "This code is slow, uses bad randomness, does not properly protect keys, and is trivially vulnerable to side channel attacks. Do not use for anything but tests." The embit copy does not carry that warning. The copy-paste header identifies a project and filename; it does not establish which revision was copied or whether that revision carried the warning.
 - **Nonces.** In the pure-Python implementation, ECDSA signing derives its nonce with a function labeled RFC 6979 unless the caller supplies one, and Schnorr signing derives its nonce with the BIP 340 tagged hash. The default pure-Python signing functions do not internally call a random number generator. A caller-supplied ECDSA nonce callback or Schnorr auxiliary data can introduce randomness.
-- **Key generation.** `util/key.py` has a `generate_privkey()` function that uses Python's `random` module. `ECKey.generate()` in the same file calls that function. No calls to `ECKey.generate()` were found elsewhere in the library source at `v0.8.2`. The inspected signing wrappers use `ECKey.set()` with a supplied secret. The available key-generation path is separate from those signing paths. The library's general random helpers in `misc.py` use `os.urandom`.
+- **Key generation.** `util/key.py` has a `generate_privkey()` function that uses Python's `random` module. `ECKey.generate()` in the same file calls that function. No calls to `ECKey.generate()` were found elsewhere in the library source at `v0.8.2`. The inspected signing wrappers use `ECKey.set()` with a supplied secret. The default pure-Python signing paths do not call a cryptographically secure pseudorandom number generator (CSPRNG); `generate_privkey()` calls `random.randrange`, whose default generator is not a CSPRNG ([Python 3.10 random documentation](https://docs.python.org/3.10/library/random.html)). The library's general random helpers in `misc.py` use `os.urandom`.
 - **Context randomization.** `context_randomize()` in the pure-Python module has an empty body. In the native bindings, `context_randomize(seed)` checks the supplied seed length and forwards those 32 bytes to the native library. The separate `_init()` function obtains 32 bytes from `os.urandom` when initializing the native context.
 - **The project's open change.** Pull request 135, opened in June 2026, deletes the pure-Python module and makes import fail when no native library loads. Its description gives two reasons: the two implementations return different results at some call sites, and "Maintaining two implementations of the same primitives is not sustainable." One reviewer reported a tested approval. The change was not merged on the date read.
 - **A downstream check.** One downstream project checks its built image for the native library and for the absence of the pure-Python module (§6).
@@ -358,6 +358,12 @@ Each source is listed once with the version or date consulted and the sections t
 | Reference | What it defines | Cited in |
 | :---- | :---- | :---- |
 | [test/functional/test_framework/key.py](https://github.com/bitcoin/bitcoin/blob/4bacf21a13c2ed25ef9362ca38f26bf0a67d22c9/test/functional/test_framework/key.py) | The upstream counterpart at the inspected commit and its test-only warning | §3.5 |
+
+**Python**, version 3.10 documentation, read 9 October 2026.
+
+| Reference | What it defines | Cited in |
+| :---- | :---- | :---- |
+| [random — Generate pseudo-random numbers](https://docs.python.org/3.10/library/random.html) | The default generator and its unsuitability for cryptographic purposes | §3.5 |
 
 **Downstream projects**
 
