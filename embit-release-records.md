@@ -6,7 +6,7 @@ This note applies [What Can You Check About a Software Release?](what-can-you-ch
 
 | Document | embit-release-records.md |
 | :---- | :---- |
-| **Version** | 0.2 — peer review draft |
+| **Version** | 0.3 — peer review draft |
 | **Audience** | People who install embit or depend on a project that does: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | The method of the release note, version 0.3. Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Record a figure with the listing it came from and the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -42,7 +42,7 @@ This section is for anyone who installs embit, or who uses a wallet that include
 
 1. **The file on PyPI is version 0.8.0, published in May 2024.** PyPI has no newer version. See [§3.1](#31-the-080-file-on-pypi).
 2. **Versions 0.8.1 and 0.8.2 exist as signed tags in the source repository.** A tag is a named point in the source history. Neither version is a file on PyPI. See [§3.2](#32-the-081-and-082-tags).
-3. **The project wrote a new release process in version 0.8.1.** The process builds and publishes from an automated system, with checksums and build records. No run of that process has completed yet. See [§3.3](#33-the-written-release-process) and [§3.4](#34-the-release-run-for-082).
+3. **The project wrote a new release process in version 0.8.1.** The process builds and publishes from an automated system, with checksums and build records. No run of that process has completed publishing yet. See [§3.3](#33-the-written-release-process) and [§3.4](#34-the-release-run-for-082).
 
 The library is between two ways of publishing. The file on PyPI comes from the earlier way. The written rules describe the later way. Most of this note follows from that one fact.
 
@@ -105,11 +105,11 @@ The project's security policy says: "Security fixes are provided for the latest 
 
 **Claim.** PyPI holds one file for embit 0.8.0, a source distribution. The file has a published hash. PyPI shows no attestation for it. The archive holds Python source and seven prebuilt libraries.
 
-**Object and date.** `embit-0.8.0.tar.gz`, read 9 October 2026 through the PyPI project page, JSON API, simple index, and integrity API. The archive was downloaded and hashed the same day. Tag `v0.8.0` in the source repository, read at repository commit `2b375a3`.
+**Object and date.** `embit-0.8.0.tar.gz`, read 9 October 2026 through the PyPI project page, JSON API, simple index, and integrity API. The archive was downloaded and hashed the same day. Its regular files were compared with the generated source archive for commit `84cce66fb831fa6d625fb73f28e03605f3c04e28`, the target of tag `v0.8.0`.
 
 **Public source.** `pypi.org/project/embit/`. `pypi.org/pypi/embit/json`. `pypi.org/simple/embit/`. The PyPI integrity API for the file. The `diybitcoinhardware/embit` repository.
 
-**What was read.** The version list. The file record for 0.8.0. The integrity response. The archive member names. The SHA-256 of the downloaded file. The tag and commit for `v0.8.0`, and the file list of the source tree at that tag.
+**What was read.** The version list. The file record for 0.8.0. The integrity response. The archive member names. The SHA-256 of the downloaded file. The tag and commit for `v0.8.0`. The regular-file contents of the PyPI archive and the generated source archive for that commit, compared after removing each archive's top-level directory name.
 
 **Result.**
 
@@ -119,11 +119,12 @@ The project's security policy says: "Security fixes are provided for the latest 
 - **Attestation.** The integrity API returned 404, "No provenance available for embit-0.8.0.tar.gz". The project page answers "Uploaded using Trusted Publishing?" with "No".
 - **Source history.** The git ref `v0.8.0` is a lightweight tag that names commit `84cce66`. The tag has no signature of its own. The commit carries a signature, and the hosting service marks it verified.
 - **What is inside.** The archive has 76 members. Fifty are `.py` files. Seven are prebuilt `libsecp256k1` libraries under `src/embit/util/prebuilt/`, for macOS, Linux, and Windows on several processor types. A pure-Python secp256k1 module is also present.
-- **The prebuilt libraries are in the public tree.** The source tree at tag `v0.8.0` holds seven library files with the same names. The libraries are therefore public as finished files. A reader can see that they were added. The repository does not hold a build record that ties them to a `libsecp256k1` commit.
+- **Comparison with the tagged tree.** All 60 regular files shared by the PyPI archive and the generated source archive for commit `84cce66` match byte for byte. These include all seven prebuilt libraries. Seven regular files occur only in the PyPI archive: `PKG-INFO`, `setup.cfg`, and five files under `src/embit.egg-info/`. They are packaging metadata. The comparison covers file contents, not archive headers, file modes, timestamps, or a rebuild of the archive.
+- **The prebuilt libraries are in the public tree.** The seven libraries match the public tree as finished files. That match does not identify the source or build inputs that produced them. No build record tying these files to a `libsecp256k1` commit was found in the repository evidence read.
 
 A hash on an index page is a fingerprint. A matching hash shows that a downloader received the file the index holds. It does not identify who built the file.
 
-**Unresolved.** The archive was not compared, file by file, with the source tree at commit `84cce66`. The prebuilt libraries were not rebuilt, and they were not tied to a public `libsecp256k1` commit. The signature on commit `84cce66` was not verified outside the hosting service. No second builder's report was found for this file.
+**Unresolved.** The seven additional packaging files were not regenerated from the tagged source. The prebuilt libraries were not rebuilt, and they were not tied to a public `libsecp256k1` commit. The signature on commit `84cce66` was not verified outside the hosting service. No second builder's report was found for this file.
 
 ### 3.2 The 0.8.1 and 0.8.2 tags
 
@@ -137,34 +138,36 @@ A hash on an index page is a fingerprint. A matching hash shows that a downloade
 
 **Result.**
 
-- **Tags.** `v0.8.1` is an annotated tag dated 2026-06-02 that names commit `b5d694a`. `v0.8.2` is an annotated tag dated 2026-08-08T15:20:39Z that names commit `eb6104f`. One tagger made both tags.
+- **Tags.** `v0.8.1` is an annotated tag dated 2026-06-02 that names commit `b5d694a`. `v0.8.2` is an annotated tag dated 2026-08-08T15:20:39Z that names commit `eb6104f`. One tagger made both tags. The signed tag-object IDs are `c6cb52b5a20868dfca132844e97d214e1a853a27` for `v0.8.1` and `a29a00c297e9a66d41bd3c2da06bd450aae7db1c` for `v0.8.2`. These identify the tag objects, separately from their target commits.
 - **Signatures.** Both tag objects carry a PGP signature. The hosting service reports each signature as valid. The signature on `v0.8.2` names key fingerprint `F2DB C4C6 14C1 13E2 B15F 879A DD5C 1264 EBD6 45BE`.
 - **Commits.** Commit `b5d694a` carries a signature. Commit `eb6104f` does not. For 0.8.0 the commit is signed and the tag is not. For 0.8.2 the tag is signed and the commit is not. In each case one signed object names the release point.
 - **Public history.** Commit `eb6104f` is an ancestor of the default branch at commit `2b375a3`. This note checked that ancestry in a clone.
 - **Prebuilt libraries.** The source trees at `v0.8.1` and `v0.8.2` hold no `.so`, `.dll`, or `.dylib` file. Commit `92e016b`, dated 2026-04-28, removed them. The 0.8.1 changelog entry reads: "Remove bundled native `libsecp256k1` binaries from package artifacts."
 - **Submodule.** The repository pins `ElementsProject/secp256k1-zkp` at commit `d9560e0` as a submodule. The pin is the same at `v0.8.0` and at `v0.8.2`.
 - **Release page.** The release page for `v0.8.2` lists two assets. Both are the source archives that the hosting service generates for every tag. The project attached no file of its own: no built package, no hash file, and no attestation.
-- **Key retrieval and authentication.** This note read the key fingerprint from the signature and from the hosting service's verification record. The repository files read for this note do not publish a key fingerprint. Under the release note's terms, the key was retrieved and not authenticated.
+- **Key retrieval and authentication.** This note read the key fingerprint from the signature and from the hosting service's verification record. The repository files read for this note do not publish a key fingerprint. The fingerprint was recorded; the public key was not retrieved or authenticated, and no local signature verification was performed.
 
-A tag signature vouches for the tag and, through it, for a commit. It does not vouch for a file built from that commit. No such file is published for these two tags.
+A tag signature vouches for the tag and, through it, for a commit. It does not vouch for a file built from that commit. No project-built source distribution or wheel is published for these two tags in the records read. The generated source archives are separate release files; this note did not compare their contents with the signed tags.
 
-**Unresolved.** No signature was verified against a key obtained outside the hosting service. The note did not establish how a reader would tie the key to the project through a second channel. The automatically generated source archives were not compared with the tag.
+**Unresolved.** No public key was retrieved, and no signature was verified locally. The note did not establish how a reader would tie the key to the project through a second channel. The automatically generated source archives were not compared with the tag.
 
 ### 3.3 The written release process
 
-**Claim.** From version 0.8.1 the repository holds a written release process. The process publishes only from an automated workflow, through a PyPI Trusted Publisher, with checksums, a software bill of materials, and build attestations. It requires release files without bundled native libraries.
+**Claim.** From version 0.8.1 the repository holds a written release process. The process calls for publishing only from an automated workflow, through a PyPI Trusted Publisher. The workflow generates checksums, a software bill of materials, and build attestations; their destinations differ. The process requires release files without bundled native libraries.
 
 **Object and date.** `RELEASING.md`, `SECURITY.md`, `docs/package-content-policy.md`, and `.github/workflows/release.yml`, at repository commit `2b375a3`, read 9 October 2026.
 
-**Public source.** The `diybitcoinhardware/embit` repository.
+**Public source.** The `diybitcoinhardware/embit` repository and the pinned publishing action in `pypa/gh-action-pypi-publish`.
 
-**What was read.** The release document. The security policy. The package content policy. The release workflow file.
+**What was read.** The release document. The security policy. The package content policy. The release workflow file. The `attestations` input in `pypa/gh-action-pypi-publish/action.yml` at the workflow's pinned commit `cef221092ed1bacb1cc03d23a2d87d1d172e277b`, read 9 October 2026.
 
 **Result.**
 
 - **Where publishing happens.** The release document says: "This project publishes from GitHub Actions only. Do not run `twine upload` from local machines."
 - **Stated rules.** The document lists four. Release tags "must reference commits already merged into the protected default branch." Artifacts "must be built once in the unprivileged build job, then reused in publish." Publishing "must use PyPI Trusted Publisher through the protected `pypi` environment." Release artifacts "must remain pure Python (no bundled native libraries)."
-- **The workflow follows the document.** A build job has read-only permission. It checks that the tag's commit is merged into the default branch, runs the tests, builds a source distribution and a wheel, verifies the package contents, and writes a hash file and a software bill of materials. A separate publish job runs in the `pypi` environment. It checks the hashes, creates a build provenance attestation for each file, and uploads through a publish action that is pinned to a commit.
+- **What the workflow implements.** A build job has read-only permission. It checks that the tag's commit is merged into the default branch, runs the tests, builds a source distribution and a wheel, verifies the package contents, and writes a hash file and a software bill of materials. A separate publish job runs in the `pypi` environment. It checks the hashes, creates a build provenance attestation for each file, and uploads through a publish action that is pinned to a commit.
+- **Destinations.** The build job stores the distributions, checksums, software bill of materials, and inspection report together as an Actions artifact. The publish job uploads the distributions to PyPI. The workflow has no step that uploads files to the release page, although the release document expects checks against files there.
+- **Two attestation paths.** The publish job calls `actions/attest-build-provenance` for the source distribution and wheel. Separately, the pinned PyPI publish action defaults its `attestations` input to `true`, and this workflow does not override it. PyPI attestations are therefore enabled for Trusted Publishing; they are distinct from the build-provenance steps. The cancelled run reached neither path.
 - **Approval.** The document describes a checklist "Before Approving `pypi`". That wording describes a person who approves the publish job after reviewing the build output.
 - **After publishing.** The document lists checks that compare the files on PyPI and on the release page with the hashes from the build.
 - **Second builder.** The process has one builder, the automated workflow. It does not call for a second party to rebuild the files. In the terms of the release note, the process addresses the signed check and provenance. It does not address the rebuilt check.
@@ -172,13 +175,13 @@ A tag signature vouches for the tag and, through it, for a commit. It does not v
 
 A written process is evidence of what the project intends. The record of a completed run would be evidence of what was done. §3.4 covers the one run so far.
 
-**Unresolved.** Three settings that the process relies on are not visible in the repository files: the protection rules on the default branch, the required reviewers on the `pypi` environment, and the Trusted Publisher configuration on PyPI. The note did not read whether the publish action would upload a PyPI attestation by default.
+**Unresolved.** Three settings that the process relies on are not visible in the repository files: the protection rules on the default branch, the required reviewers on the `pypi` environment, and the Trusted Publisher configuration on PyPI. The note did not establish how release-page files would be published to satisfy the post-publish checklist.
 
 ### 3.4 The release run for 0.8.2
 
 **Claim.** The release workflow has run once, for tag `v0.8.2`. A maintainer account cancelled the run before the build job finished. The run published no file.
 
-**Object and date.** The one run of the release workflow, read 9 October 2026 through its public run page.
+**Object and date.** Release workflow run `31264239479`, attempt 1, for commit `eb6104fd85d3becabba628756cd5e1b75619f3a1`, read 9 October 2026 through its public run page and job records.
 
 **Public source.** The workflow run list and the run page in the `diybitcoinhardware/embit` repository.
 
@@ -188,7 +191,7 @@ A written process is evidence of what the project intends. The record of a compl
 
 - **Trigger.** The push of tag `v0.8.2` started the run on 8 August 2026.
 - **Conclusion.** The run's conclusion is "cancelled". The run page carries the annotation that a maintainer account cancelled it. The run lasted under one minute.
-- **How far the run went.** The build job completed the checkout, the ancestry check, the tests, the build, and the package content check. The run was cancelled during the next step. The later steps did not run: the software bill of materials, the hash file, and the upload of the build output. The publish job did not start.
+- **How far the run went.** The build job completed the checkout, the ancestry check, the tests, the build, and the package content check. The run was cancelled during the next step, “Smoke install from local artifacts.” The later steps did not run: the software bill of materials, the hash file, and the upload of the build output. The publish job did not start.
 - **Output.** The run stored no artifact. No attestation was created. No file was uploaded to PyPI.
 
 A cancelled run is a different fact from a failed check. The record shows that someone with access stopped the run. It does not show why.
@@ -199,9 +202,9 @@ A cancelled run is a different fact from a failed check. The record shows that s
 
 | Check | The 0.8.0 file on PyPI | Tags `v0.8.1` and `v0.8.2` |
 | :---- | :---- | :---- |
-| **Public** | The source history is public, and tag `v0.8.0` names a commit in it. The archive was not compared with that commit. The seven prebuilt libraries are public as finished files, without a build record. | The source history is public. Each tag names a commit that a reader can open. |
-| **Signed** | No signature on the file; PyPI did not accept PGP signatures at the upload date. No PyPI attestation. The commit behind the tag carries a signature. | Each annotated tag carries a signature that the hosting service reports as valid. The key was retrieved and not authenticated for this note. |
-| **Rebuilt** | No second builder's report was found. | Not applicable. No release file is published for these tags. |
+| **Public** | The source history is public, and tag `v0.8.0` names a commit in it. The 60 shared regular files match the tagged tree, including seven prebuilt libraries; seven additional files are packaging metadata. The native libraries remain public as finished files without an established link to their source and build inputs. | The source history is public. Each tag names a commit that a reader can open. |
+| **Signed** | No signature on the file; PyPI did not accept PGP signatures at the upload date. No PyPI attestation. The commit behind the tag carries a signature. | Each annotated tag carries a signature that the hosting service reports as valid. The fingerprint was recorded. Public-key retrieval, authentication, and local signature verification were not performed. |
+| **Rebuilt** | No second builder's report was found. | Not applicable to the tag objects. No project-built source distribution or wheel was found. Generated source archives are separate files whose correspondence with the tags was not checked. |
 | **What the downloader checks** | The file's hash against the hash that PyPI lists. That step uses no key. | The tag signature, after the reader has a reason to tie the key to the project. |
 
 The public check shows that a change can be read. It does not show that anyone read it.
@@ -212,11 +215,11 @@ The rows below are the rows of the [release note §4.1](what-can-you-check-about
 
 | Step | embit, as read 9 October 2026 |
 | :---- | :---- |
-| **What the project publishes** | One source distribution on PyPI (0.8.0). Signed tags for 0.8.1 and 0.8.2. The written process describes a source distribution and a wheel. |
+| **What the project publishes** | One source distribution on PyPI (0.8.0). Signed tags for 0.8.1 and 0.8.2, with generated source archives on the 0.8.2 release page. The written process describes a source distribution and a wheel. |
 | **Where the release ties to source history** | Public tags. `v0.8.0` is a lightweight tag on a signed commit. `v0.8.1` and `v0.8.2` are signed annotated tags. |
 | **Object that is signed** | For 0.8.0, the commit. For 0.8.1 and 0.8.2, the tag. No signature on a release file. |
-| **Who signs** | The author of the commit, or the tagger. |
-| **Where a reader retrieves keys** | Not read for this note, beyond the signature and the hosting service's record. |
+| **Who signs** | The key named by the commit or tag signature. The note relies on the hosting service's verification record and does not authenticate the key holder. |
+| **Where a reader retrieves keys** | Not read for this note. Only a fingerprint was recorded; no public key was retrieved. |
 | **What the documents offer to authenticate a key** | No key fingerprint in the repository files read. |
 | **Rebuild in the written process** | Not in the written process. The workflow is the one builder. |
 | **What a failed rebuild blocks** | Not applicable. The written process has an approval step before publishing, and no rebuild step. |
@@ -231,7 +234,7 @@ In one respect embit's tags resemble the kernel record in the release note: a de
 
 These entries show which object a downstream project names. They are not reviews of those projects.
 
-- **A pin to the PyPI file.** SeedSigner's `requirements.txt` on the `dev` branch pins `embit==0.8.0`. The `seedsigner-os` build files record the SHA-256 `8bf4b100…5ed770` for `embit-0.8.0.tar.gz`, the same value as in §3.1. The same directory holds a script, `verify-secp256k1-binary.sh`, that checks the `libsecp256k1` library in the built image.
+- **A pin to the PyPI file.** SeedSigner's `requirements.txt` on the `dev` branch pins `embit==0.8.0`. The `seedsigner-os` build files record the SHA-256 `8bf4b100…5ed770` for `embit-0.8.0.tar.gz`, the same value as in §3.1. The same directory holds `verify-secp256k1-binary.sh`. The script checks that the expected ARM library filenames and binding modules are present, and that the pure-Python fallback and unexpected prebuilt entries are absent. The script does not hash, rebuild, or execute the native libraries. Its checks do not establish their build provenance.
 - **A pin to a commit.** Krux includes embit as a git submodule at commit `eb6104f`, the commit behind tag `v0.8.2`. Its build files compile the `libsecp256k1` that embit's submodule pins and place the result where embit looks for it.
 
 A pin to a hash shows which file a project named. A pin to a commit shows which source a project named. Neither pin signs anything, and neither covers the image that the downstream project builds afterwards. That image is a downstream build with its own record.
@@ -242,12 +245,12 @@ The claims are from the [release note §6](what-can-you-check-about-a-release.md
 
 | If the claim is | What the record shows | Artifact that would complete it |
 | :---- | :---- | :---- |
-| **The source is open** | A public repository, with a tag for each version | A comparison of `embit-0.8.0.tar.gz` with the source tree at tag `v0.8.0` |
+| **The source is open** | A public repository. All 60 regular files shared by the 0.8.0 archive and tagged tree match, including seven native libraries; seven additional files are packaging metadata. | Evidence linking the bundled native libraries to public source and the build inputs that produced them. Matching finished binaries does not supply that link. |
 | **It is signed** | A signed commit for 0.8.0. Signed tags for 0.8.1 and 0.8.2. | A signature or attestation on a release file, and a published way to authenticate the key |
 | **Anyone can reproduce it** | A workflow that builds once | A second builder's signed report of the same hash for a published file |
-| **We publish provenance** | Attestation steps in the workflow. No completed run. | The attestation for a published file, and who issued it |
-| **Releases follow the written process** | The process, and one cancelled run | The record of a completed run for a published version |
-| **The artifacts are pure Python** | True of the source trees at `v0.8.1` and `v0.8.2`. The 0.8.0 file on PyPI predates the rule and holds seven prebuilt libraries. | A published file built under the rule |
+| **We publish provenance** | Separate build-provenance steps and PyPI attestations enabled in the workflow. The cancelled run produced neither. | The attestation for a published file, and who issued it |
+| **Releases follow the written process** | The process, and one cancelled run. The workflow has no release-page upload step. | A completed publishing run and evidence that the release-page files and post-publish checks satisfy the written process |
+| **The artifacts are pure Python** | No `.so`, `.dll`, or `.dylib` files were found in the source trees at `v0.8.1` and `v0.8.2`. The 0.8.0 file on PyPI predates the rule and holds seven prebuilt libraries. | A published file built under the rule |
 | **You can verify it yourself** | A hash comparison for the PyPI file. A tag signature for the repository. | A verification step for a release file that names a key |
 
 A missing artifact means only that this note does not show the claim.
@@ -258,7 +261,7 @@ A missing artifact means only that this note does not show the claim.
 - No person is assessed. The note names roles: the tagger, a maintainer account, the commit author.
 - The note reads one library on one date. The project changed its release process within the year before that date, and the record can change again. Read the sources for the date you need.
 - A library is a different object from an application. The release note's comparison was written for programs that people download and run. Rows that do not fit a library are marked "Not applicable".
-- Figures from PyPI are as read on 9 October 2026. For version 0.2, the hash was confirmed against a downstream pin file and the project page was reread. The file size, upload time, and archive member counts were carried forward from version 0.1.
+- Figures from PyPI are as read on 9 October 2026. For version 0.3, the JSON record was reread, and the archive was downloaded, hashed, and recounted. Shared regular-file contents were compared with the generated source archive for commit `84cce66`. This was a file comparison, not a reproducible build or local verification of the commit signature.
 - Quotes from the repository are the text at commit `2b375a3`.
 - Signing-device firmware and wallet images are out of scope. §6 names two downstream projects only to show which object each one pins.
 - A missing artifact means only that this note does not show the claim.
@@ -276,19 +279,32 @@ Each source is listed once with the version or date consulted and the sections t
 | [docs/package-content-policy.md](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/docs/package-content-policy.md) | What a published file may contain | §3.3 |
 | [.github/workflows/release.yml](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/.github/workflows/release.yml) | The release workflow | §3.3, §3.4 |
 | [CHANGELOG.md](https://github.com/diybitcoinhardware/embit/blob/2b375a33bd8926caec7e53d7cfd41b165d196566/CHANGELOG.md) | Changes in 0.8.1 and 0.8.2 | §2, §3.2 |
-| [Tag v0.8.0](https://github.com/diybitcoinhardware/embit/tree/84cce66fb831fa6d625fb73f28e03605f3c04e28) | Commit `84cce66` and its source tree | §3.1 |
-| [Tag v0.8.1](https://github.com/diybitcoinhardware/embit/tree/b5d694a79790c502f7725781332aa33d26a5486d) | Commit `b5d694a` and its source tree | §3.2 |
-| [Tag v0.8.2](https://github.com/diybitcoinhardware/embit/tree/eb6104fd85d3becabba628756cd5e1b75619f3a1) | Commit `eb6104f` and its source tree | §3.2, §6 |
+| [Source tree for v0.8.0](https://github.com/diybitcoinhardware/embit/tree/84cce66fb831fa6d625fb73f28e03605f3c04e28) | Commit `84cce66` and its source tree | §3.1 |
+| [Source tree for v0.8.1](https://github.com/diybitcoinhardware/embit/tree/b5d694a79790c502f7725781332aa33d26a5486d) | Commit `b5d694a` and its source tree | §3.2 |
+| [Source tree for v0.8.2](https://github.com/diybitcoinhardware/embit/tree/eb6104fd85d3becabba628756cd5e1b75619f3a1) | Commit `eb6104f` and its source tree | §3.2, §6 |
+| [Signed tag object for v0.8.1](https://api.github.com/repos/diybitcoinhardware/embit/git/tags/c6cb52b5a20868dfca132844e97d214e1a853a27) | Tag object, target commit, signature, and hosting-service verification | §3.2 |
+| [Signed tag object for v0.8.2](https://api.github.com/repos/diybitcoinhardware/embit/git/tags/a29a00c297e9a66d41bd3c2da06bd450aae7db1c) | Tag object, target commit, signature, and hosting-service verification | §3.2 |
+| [Generated source archive, commit 84cce66](https://codeload.github.com/diybitcoinhardware/embit/tar.gz/84cce66fb831fa6d625fb73f28e03605f3c04e28) | Tagged-tree regular files used in the archive comparison | §3.1 |
 | [Commit 92e016b](https://github.com/diybitcoinhardware/embit/commit/92e016b4d5a6ec329d2fc23dfdebfea7b8061258) | Removal of the prebuilt libraries | §2, §3.2 |
 | [Release page for v0.8.2](https://github.com/diybitcoinhardware/embit/releases/tag/v0.8.2) | Assets and tag verification, read 9 October 2026 | §3.2 |
 | [Release workflow runs](https://github.com/diybitcoinhardware/embit/actions/workflows/release.yml) | The one run, read 9 October 2026 | §3.4 |
+| [Release run 31264239479, attempt 1](https://github.com/diybitcoinhardware/embit/actions/runs/31264239479/attempts/1) | The cancelled run for commit `eb6104f`, read 9 October 2026 | §3.4 |
+| [Release run job records](https://api.github.com/repos/diybitcoinhardware/embit/actions/runs/31264239479/attempts/1/jobs) | Step conclusions for attempt 1, read 9 October 2026 | §3.4 |
 
-**PyPI**, read 9 October 2026. These pages are not pinned to a version.
+**Publishing action**, at commit `cef221092ed1bacb1cc03d23a2d87d1d172e277b`, read 9 October 2026.
+
+| Reference | What it defines | Cited in |
+| :---- | :---- | :---- |
+| [pypa/gh-action-pypi-publish/action.yml](https://github.com/pypa/gh-action-pypi-publish/blob/cef221092ed1bacb1cc03d23a2d87d1d172e277b/action.yml) | The enabled-by-default PyPI attestation input | §3.3 |
+
+**PyPI**, read 9 October 2026. The project listings can change; the archive and integrity endpoint below name version 0.8.0.
 
 | Reference | What it defines | Cited in |
 | :---- | :---- | :---- |
 | [embit project page](https://pypi.org/project/embit/) | Versions, upload date, and the Trusted Publishing answer | §3.1 |
 | [embit JSON record](https://pypi.org/pypi/embit/json) | The file record and digest | §3.1 |
+| [embit 0.8.0 source distribution](https://files.pythonhosted.org/packages/83/88/b054b00ade6d2a41749e15976cdcec4b7ec4656ac1cb917ce3de395528d1/embit-0.8.0.tar.gz) | The archive hashed, counted, and compared | §3.1 |
+| [embit 0.8.0 integrity record](https://pypi.org/integrity/embit/0.8.0/embit-0.8.0.tar.gz/provenance) | The response reporting no provenance for this file | §3.1 |
 | [embit simple index](https://pypi.org/simple/embit/) | The file link and digest | §3.1 |
 | [Removing PGP from PyPI, 23 May 2023](https://blog.pypi.org/posts/2023-05-23-removing-pgp/) | The end of PGP signature uploads | §3.1 |
 | [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) | The Trusted Publisher feature | §1.2 |
@@ -300,11 +316,12 @@ Each source is listed once with the version or date consulted and the sections t
 | :---- | :---- | :---- |
 | [SeedSigner requirements.txt, commit b2199c6](https://github.com/SeedSigner/seedsigner/blob/b2199c68b475eab0035b863b156f149757a1b4a6/requirements.txt) | The pin to embit 0.8.0 | §6 |
 | [seedsigner-os python-embit, commit c4cb767](https://github.com/SeedSigner/seedsigner-os/tree/c4cb767a00ace8edf5e9414450c2849e15958ad7/opt/external-packages/python-embit) | The hash pin and the library check script | §3.1, §6 |
+| [verify-secp256k1-binary.sh, commit c4cb767](https://github.com/SeedSigner/seedsigner-os/blob/c4cb767a00ace8edf5e9414450c2849e15958ad7/opt/external-packages/python-embit/verify-secp256k1-binary.sh) | Filename, module-presence, and fallback-absence checks | §6 |
 | [Krux, commit 9b3a431](https://github.com/selfcustody/krux/tree/9b3a4314a205767606b1ad9fbd1da06ad908f38e) | The submodule pin and the library build task | §6 |
 
 ## Changelog
 
-Newest first. Versioning follows [STYLE.md](STYLE.md).
+Newest first. Versioning follows [STYLE.md](STYLE.md). This note uses the tag prefix `embit-v` because the repository's unprefixed version tags already identify the custody note.
 
 | Version | Change |
 | :---- | :---- |
