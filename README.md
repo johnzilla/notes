@@ -22,7 +22,7 @@ A comparison of software release processes, for people deciding what a download 
 
 *The release note's questions, put to one library*
 
-**Version 0.4, peer review draft.** See the [changelog](embit-release-records.md#changelog) for revisions.
+**Version 0.5, peer review draft.** See the [changelog](embit-release-records.md#changelog) for revisions.
 
 A worked example of the release note's method, applied to embit, a Bitcoin library for Python that other projects build on. It opens with a plain-language Start here section. It records three objects: the 0.8.0 file on the Python Package Index, the signed tags for 0.8.1 and 0.8.2 in the source repository, and the written release process that the project added in 0.8.1. For each, it states what the public, signed, and rebuilt checks show, what the person who downloads can check, and what stays unresolved. It records the byte-for-byte match of 60 files shared by the PyPI archive and tagged tree, while leaving the native libraries' build provenance unresolved. It distinguishes workflow output destinations and the two attestation paths, and states what one downstream check script actually checks. It notes which object two downstream projects pin. Every reading is tied to a pinned commit or to the date a page was read. The note records release evidence only: it does not assess the library's code, and no person is assessed.
 

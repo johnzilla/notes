@@ -6,7 +6,7 @@ This note applies [What Can You Check About a Software Release?](what-can-you-ch
 
 | Document | embit-release-records.md |
 | :---- | :---- |
-| **Version** | 0.4 — peer review draft |
+| **Version** | 0.5 — peer review draft |
 | **Audience** | People who install embit or depend on a project that does: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | The method of the release note, version 0.3. Separate three checks — public, signed, rebuilt — and tie each claim to a public artifact. Record a figure with the listing it came from and the date that listing was read. |
 | **Changes** | See the [changelog](#changelog). |
@@ -205,22 +205,22 @@ A cancelled run is a different fact from a failed check. The record shows that s
 
 **Claim.** An embit release holds two implementations of its secp256k1 operations: bindings to a native `libsecp256k1`, and a pure-Python implementation. The library chooses between them when it is imported. The release record does not determine which one runs.
 
-**Object and date.** The source trees at tags `v0.8.0` and `v0.8.2`, the project README at both tags, and the origin file in the Bitcoin Core repository at commit `4bacf21`, read 9 October 2026. Pull request 135 in the embit repository, read the same day.
+**Object and date.** The source trees at tags `v0.8.0` and `v0.8.2`, the project README at both tags, and the upstream counterpart in the Bitcoin Core repository at commit `4bacf21`, read 9 October 2026. Pull request 135 in the embit repository, read the same day.
 
-**Public source.** `src/embit/util/secp256k1.py`, `src/embit/util/py_secp256k1.py`, `src/embit/util/key.py`, and `README.md` in the `diybitcoinhardware/embit` repository. `test/functional/test_framework/key.py` in the Bitcoin Core repository.
+**Public source.** `src/embit/util/secp256k1.py`, `src/embit/util/py_secp256k1.py`, `src/embit/util/key.py`, `src/embit/util/ctypes_secp256k1.py`, `src/embit/misc.py`, and `README.md` in the `diybitcoinhardware/embit` repository. `test/functional/test_framework/key.py` in the Bitcoin Core repository.
 
-**What was read.** The selection code. The header and the signing, nonce, and key-generation functions of the pure-Python implementation. The README text on backends. The header of the origin file. The title, description, and review comments of pull request 135.
+**What was read.** The selection code. The header and the signing, nonce, and key-generation functions of the pure-Python implementation. The README text on backends. The header of the upstream counterpart at the inspected commit. The native library search paths, context initialization, and context-randomization wrapper. Calls to `generate_privkey()` and `ECKey.generate()` in the library source at `v0.8.2`. The title, description, and review comments of pull request 135.
 
 **Result.**
 
-- **Selection.** `util/secp256k1.py` tries the MicroPython `secp256k1` module, then the ctypes bindings, then the pure-Python module. Each step sits inside a bare `except:` clause, so any error in a step moves to the next one. The files read contain no warning or log line at that point, and no function that reports which implementation was chosen.
-- **Per-function selection.** At `v0.8.2`, when the loaded native library lacks an optional symbol, the library takes that one function from the pure-Python module and keeps the native library for the rest. One process can therefore use both implementations.
+- **Selection.** `util/secp256k1.py` tries the MicroPython `secp256k1` module, then the ctypes bindings, then the pure-Python module. Bare `except:` clauses catch errors in the MicroPython and ctypes selection paths and trigger the next path. An error in the final pure-Python import can still propagate. The files read contain no warning or log line at that point, and no function that reports which implementation was chosen.
+- **Per-function selection.** At `v0.8.2`, when the loaded native library lacks an optional symbol, the selector substitutes a Python function only if the pure-Python module supplies it. Otherwise, the selector removes that API from its namespace. The Python module supplies Schnorr functions but not ECDH. One process can therefore use both implementations, while some operations remain unavailable.
 - **The documents state the behavior.** The README at `v0.8.2` says: "If no compatible system library is available, `embit` automatically falls back to the pure Python implementation." The README at `v0.8.0` says the same of the prebuilt and system libraries.
-- **Effect of the pure-Python rule.** Under the rule in §3.3, a published file holds no native library. A person who installs such a file on a machine without a system `libsecp256k1` gets the pure-Python implementation. The 0.8.0 file holds prebuilt libraries for seven platform targets, so on those targets it loads a native library first.
-- **Origin of the pure-Python code.** `util/key.py` begins: "Copy-paste from key.py in bitcoin test_framework." The origin file in Bitcoin Core describes itself as a "Test-only secp256k1 elliptic curve protocols implementation" and carries this warning: "This code is slow, uses bad randomness, does not properly protect keys, and is trivially vulnerable to side channel attacks. Do not use for anything but tests." The embit copy does not carry that warning.
-- **Nonces.** In the pure-Python implementation, ECDSA signing derives its nonce with a function labeled RFC 6979 unless the caller supplies one, and Schnorr signing derives its nonce with the BIP 340 tagged hash. Signing does not draw on a random number generator.
-- **Key generation.** `util/key.py` has a `generate_privkey()` function that uses Python's `random` module. No caller of that function was found in the library's own source at `v0.8.2`. The library's general random helpers in `misc.py` use `os.urandom`.
-- **Context randomization.** `context_randomize()` in the pure-Python module has an empty body. In the native bindings, the same call passes 32 random bytes to the native library.
+- **Effect of the pure-Python rule.** Under the rule in §3.3, a published file holds no native library. At `v0.8.2`, the ctypes loader searches repository-local paths, system libraries, and in-tree prebuilt paths. Absence of a system library alone does not establish which implementation loads. If neither the MicroPython path nor the ctypes path succeeds, the selector attempts the pure-Python import. The 0.8.0 file holds prebuilt libraries for seven platform targets and attempts to load the matching file before falling back. A matching platform name does not guarantee successful loading.
+- **Origin of the pure-Python code.** `util/key.py` begins: "Copy-paste from key.py in bitcoin test_framework." The upstream counterpart at Bitcoin Core commit `4bacf21` describes itself as a "Test-only secp256k1 elliptic curve protocols implementation" and carries this warning: "This code is slow, uses bad randomness, does not properly protect keys, and is trivially vulnerable to side channel attacks. Do not use for anything but tests." The embit copy does not carry that warning. The copy-paste header identifies a project and filename; it does not establish which revision was copied or whether that revision carried the warning.
+- **Nonces.** In the pure-Python implementation, ECDSA signing derives its nonce with a function labeled RFC 6979 unless the caller supplies one, and Schnorr signing derives its nonce with the BIP 340 tagged hash. The default pure-Python signing functions do not internally call a random number generator. A caller-supplied ECDSA nonce callback or Schnorr auxiliary data can introduce randomness.
+- **Key generation.** `util/key.py` has a `generate_privkey()` function that uses Python's `random` module. `ECKey.generate()` in the same file calls that function. No calls to `ECKey.generate()` were found elsewhere in the library source at `v0.8.2`. The inspected signing wrappers use `ECKey.set()` with a supplied secret. The available key-generation path is separate from those signing paths. The library's general random helpers in `misc.py` use `os.urandom`.
+- **Context randomization.** `context_randomize()` in the pure-Python module has an empty body. In the native bindings, `context_randomize(seed)` checks the supplied seed length and forwards those 32 bytes to the native library. The separate `_init()` function obtains 32 bytes from `os.urandom` when initializing the native context.
 - **The project's open change.** Pull request 135, opened in June 2026, deletes the pure-Python module and makes import fail when no native library loads. Its description gives two reasons: the two implementations return different results at some call sites, and "Maintaining two implementations of the same primitives is not sustainable." One reviewer reported a tested approval. The change was not merged on the date read.
 - **A downstream check.** One downstream project checks its built image for the native library and for the absence of the pure-Python module (§6).
 
@@ -228,7 +228,7 @@ Two implementations in one file is a release fact: a reader who has verified the
 
 This record quotes what the files say about themselves. It does not assess whether the pure-Python implementation is fit for a given use.
 
-**Unresolved.** The note did not test which implementation loads on any platform. It did not measure the pure-Python implementation for timing behavior, and it did not compare the embit copy with the origin file line by line. It did not read which implementation any downstream project runs, beyond the check in §6. The note did not read the MicroPython `secp256k1` module.
+**Unresolved.** The note did not test which implementation loads on any platform. It did not measure the pure-Python implementation for timing behavior, and it did not compare the embit copy with the upstream counterpart line by line or establish the historical revision copied. It did not read which implementation any downstream project runs, beyond the check in §6. The note did not read the MicroPython `secp256k1` module.
 
 ## 4. The three checks, by object
 
@@ -283,7 +283,7 @@ The claims are from the [release note §6](what-can-you-check-about-a-release.md
 | **We publish provenance** | Separate build-provenance steps and PyPI attestations enabled in the workflow. The cancelled run produced neither. | The attestation for a published file, and who issued it |
 | **Releases follow the written process** | The process, and one cancelled run. The workflow has no release-page upload step. | A completed publishing run and evidence that the release-page files and post-publish checks satisfy the written process |
 | **The artifacts are pure Python** | No `.so`, `.dll`, or `.dylib` files were found in the source trees at `v0.8.1` and `v0.8.2`. The 0.8.0 file on PyPI predates the rule and holds seven prebuilt libraries. | A published file built under the rule |
-| **It uses libsecp256k1** | Bindings to a native library, with a pure-Python implementation that takes over without a signal when the native one does not load (§3.5) | Evidence of which implementation loaded in the build you run, such as an import that fails without the native library, or a check of the built image |
+| **It uses libsecp256k1** | Bindings to a native library, with a whole-module fallback and conditional per-function Python replacements (§3.5) | Evidence identifying the loaded native library and the implementation selected for each relevant operation, or a demonstrated configuration that excludes Python fallback paths. Native-library presence or an import that requires it does not alone rule out per-function fallback. |
 | **You can verify it yourself** | A hash comparison for the PyPI file. A tag signature for the repository. | A verification step for a release file that names a key |
 
 A missing artifact means only that this note does not show the claim.
@@ -295,7 +295,7 @@ A missing artifact means only that this note does not show the claim.
 - The note reads one library on one date. The project changed its release process within the year before that date, and the record can change again. Read the sources for the date you need.
 - A library is a different object from an application. The release note's comparison was written for programs that people download and run. Rows that do not fit a library are marked "Not applicable".
 - Figures from PyPI are as read on 9 October 2026. For version 0.3, the JSON record was reread, and the archive was downloaded, hashed, and recounted. Shared regular-file contents were compared with the generated source archive for commit `84cce66`. This was a file comparison, not a reproducible build or local verification of the commit signature.
-- Quotes from the repository are the text at commit `2b375a3`.
+- Release-process quotes are from embit commit `2b375a3`. Implementation and README readings in §3.5 use the tagged versions named there; the upstream warning is from Bitcoin Core commit `4bacf21`.
 - Signing-device firmware and wallet images are out of scope. §6 names two downstream projects only to show which object each one pins.
 - A release record describes a file. It does not show which code path runs after installation. §3.5 records that the file holds two implementations and quotes their own descriptions. It is not a review of either one.
 - A missing artifact means only that this note does not show the claim.
@@ -316,6 +316,9 @@ Each source is listed once with the version or date consulted and the sections t
 | [util/secp256k1.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/secp256k1.py) | Selection between implementations | §3.5 |
 | [util/py_secp256k1.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/py_secp256k1.py) | The pure-Python module | §3.5 |
 | [util/key.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/key.py) | Pure-Python signing, nonce, and key-generation functions, and the stated origin | §3.5 |
+| [util/ctypes_secp256k1.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/util/ctypes_secp256k1.py) | Native library search, initialization, and context-randomization wrapper | §3.5 |
+| [misc.py at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/src/embit/misc.py) | General random helpers | §3.5 |
+| [util/ctypes_secp256k1.py at v0.8.0](https://github.com/diybitcoinhardware/embit/blob/84cce66fb831fa6d625fb73f28e03605f3c04e28/src/embit/util/ctypes_secp256k1.py) | Prebuilt-library lookup and loading | §3.5 |
 | [README.md at v0.8.2](https://github.com/diybitcoinhardware/embit/blob/eb6104fd85d3becabba628756cd5e1b75619f3a1/README.md) | The documented backend order and fallback | §3.5 |
 | [README.md at v0.8.0](https://github.com/diybitcoinhardware/embit/blob/84cce66fb831fa6d625fb73f28e03605f3c04e28/README.md) | The documented fallback for the 0.8.0 file | §3.5 |
 | [Pull request 135](https://github.com/diybitcoinhardware/embit/pull/135) | The open change that removes the pure-Python module, read 9 October 2026 | §3.5 |
@@ -354,7 +357,7 @@ Each source is listed once with the version or date consulted and the sections t
 
 | Reference | What it defines | Cited in |
 | :---- | :---- | :---- |
-| [test/functional/test_framework/key.py](https://github.com/bitcoin/bitcoin/blob/4bacf21a13c2ed25ef9362ca38f26bf0a67d22c9/test/functional/test_framework/key.py) | The origin file and its test-only warning | §3.5 |
+| [test/functional/test_framework/key.py](https://github.com/bitcoin/bitcoin/blob/4bacf21a13c2ed25ef9362ca38f26bf0a67d22c9/test/functional/test_framework/key.py) | The upstream counterpart at the inspected commit and its test-only warning | §3.5 |
 
 **Downstream projects**
 
