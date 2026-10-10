@@ -6,7 +6,7 @@ This note describes kinds of fallback. It reads two public records as examples.
 
 | Document | which-code-actually-runs.md |
 | :---- | :---- |
-| **Version** | 0.2 — peer review draft |
+| **Version** | 0.3 — peer review draft |
 | **Audience** | People who rely on a wallet, a signing device, or a library to make or use keys: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | Identify each place where software chooses between two ways to do the same job. For each, record what decides the choice, when, and what a reader could inspect to learn which way ran. Tie each statement to a public source. |
 | **Changes** | See the [changelog](#changelog). |
@@ -72,7 +72,7 @@ Each record in §3 has: **claim; object and date; public source; what was read; 
 | **Intended path** | The way the makers mean the software to use. |
 | **Selection** | The step that decides which way runs. |
 | **Build-time selection** | Selection made when the software is compiled or linked. Every copy of that build then uses the same way. |
-| **Run-time selection** | Selection made when the software starts or when a function is called. Two copies of one file can use different ways. |
+| **Run-time selection** | Selection made when the software starts or when a function is called. Two copies of one file can use different ways. The selection can depend on the environment: one machine has the native library and uses it, and another machine lacks the library and uses the fallback, with the same file on both. |
 | **Silent** | The software gives no error, warning, or record when the fallback is chosen. A fallback can be described in a document and still be silent when it runs. |
 | **Fail closed** | The software stops when the intended way is not available. |
 | **Presence and reachability** | Presence: the intended code is in the file. Reachability: the job in question actually calls it. Presence does not establish reachability. |
@@ -105,7 +105,7 @@ Three properties apply to every kind.
 
 **What was read.** The affected versions. The stated cause. The stated effect on seed strength. The stated fix. The maker's statement on why earlier review did not find the fault.
 
-**Result.**
+**Result.** Each point below reports what the accounts state, and names the account. This note verified none of those statements: it did not read the firmware source for the fault, test a device, or check an entropy figure. The two points on release evidence are the exception. This note read those in the firmware repository.
 
 - **The intended path.** The firmware has its own wrapper for the microcontroller's hardware random source. The production board configuration sets the macro `MICROPY_HW_ENABLE_RNG` to zero. The analysis quotes the comment beside it: "We have our own version of this code."
 - **The fallback.** MicroPython includes a software generator for boards without a hardware source. The analysis identifies it as the Yasmarang generator.
@@ -165,7 +165,7 @@ The two records share a pattern: a fallback took over, or can take over, with no
 | Question | Coldcard firmware seed generation | embit secp256k1 |
 | :---- | :---- | :---- |
 | **What job has a fallback?** | Producing random values for a new seed | Elliptic-curve operations, including signing |
-| **When is selection made?** | At build time. Every device with an affected release used the same path. | At import. The result depends on the machine, and can differ between two copies of one file. |
+| **When is selection made?** | At build time. Every device with an affected release used the same path. | At import. The result depends on the machine: a copy on a machine with a usable native library uses it, and an identical copy on a machine without one uses the pure-Python implementation. |
 | **Was the fallback meant to be reachable?** | No, by the maker's account. The configuration was meant to exclude it. | Yes. The project's README describes it. |
 | **What does the fallback weaken?** | The unpredictability of the seed, by the maker's account | Not established by the records read. The origin file warns about side channels and key protection. The project's open change cites differing results. |
 | **Who could make use of the difference?** | Anyone, offline, by the maker's account | Not established by the records read |
@@ -235,5 +235,6 @@ Newest first. Versioning follows [STYLE.md](STYLE.md).
 
 | Version | Change |
 | :---- | :---- |
+| 0.3 — 9 October 2026 | States at the head of the §3.1 result that the points report what the accounts state and that this note verified none of them, except the release evidence it read in the repository. States in §1.2 and §4 that a run-time selection can depend on the environment, so identical copies of one file can use different implementations on different machines. |
 | 0.2 — 9 October 2026 | Adds §3.3, which applies the release note's public, signed, rebuilt, and provenance checks to both records and states what each check leaves open for a fallback. States the limit in §1: a reproducible build reproduces a fallback that the source selects. Adds the Coldcard firmware repository's signed hash file and documented rebuild to §3.1, checked at five affected release tags and at the last tag before the affected range. Adds two §6 rows and a §7 limit. |
 | 0.1 — 9 October 2026 | First draft. Terms for fallback, selection, and presence versus reachability. Four kinds of fallback. Two public records: Coldcard firmware seed generation, from the maker's account and one independent analysis, and the embit secp256k1 implementation, summarized from the embit note. A table of what separates the two records, a table of controls with the artifact for each, and a list of reviewable claims. |

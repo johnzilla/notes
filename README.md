@@ -30,6 +30,6 @@ A worked example of the release note's method, applied to embit, a Bitcoin libra
 
 *Questions to ask when software has more than one way to do a job*
 
-**Version 0.2, peer review draft.** See the [changelog](which-code-actually-runs.md#changelog) for revisions.
+**Version 0.3, peer review draft.** See the [changelog](which-code-actually-runs.md#changelog) for revisions.
 
 A note on fallbacks in software that makes or uses keys, for people who rely on such software and for technical reviewers. It opens with a plain-language Start here section. It defines a fallback, the selection between two ways to do a job, and the difference between code that is present and code that is reached. It describes four kinds of fallback and what a reader could inspect for each. It reads two public records: the random source for seeds in Coldcard firmware, from the maker's account and one independent analysis, and the secp256k1 implementation in the embit library. A table sets out what separates the two records, so that no conclusion carries from one to the other. It ends with the controls a project can show, each paired with the artifact that lets a reader check it, and with questions that make a claim reviewable. It makes no claim about how common the pattern is, and no organization is assessed.
