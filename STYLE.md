@@ -1,6 +1,6 @@
 # Style guide
 
-Rules for editing the notes in this repository: [Who Can Move Your Bitcoin?](who-can-move-your-bitcoin.md) and [What Can You Check About a Software Release?](what-can-you-check-about-a-release.md). They apply to every change, by any author. Check a change against this page before you commit it.
+Rules for editing the notes in this repository: [Who Can Move Your Bitcoin?](who-can-move-your-bitcoin.md) and [What Can You Check About a Software Release?](what-can-you-check-about-a-release.md), and notes that apply the release note to one project, such as [What Can You Check About an embit Release?](embit-release-records.md). They apply to every change, by any author. Check a change against this page before you commit it.
 
 Section numbers in the rules, such as §1.1 and §8, refer to the custody note. Rules that differ for the release note are marked.
 
@@ -15,7 +15,7 @@ Write "Start here" and any plain-language text for the first reader. Write the t
 
 ## Content rules
 
-1. **No names.** Do not name products, companies, people, or specific incidents. Describe configurations, not providers. *Release note exception:* the release note names open-source projects, because it compares their public release processes. It still does not name companies, people, or incidents. It states what each project's public documents say, and it does not rank the projects.
+1. **No names.** Do not name products, companies, people, or specific incidents. Describe configurations, not providers. *Release note exception:* the release note, and each note that applies it to one project, names open-source projects, because these notes describe public release processes. They still do not name companies, people, or incidents. Where a record involves a person, name the role: the tagger, the commit author, a maintainer account. A key fingerprint is an artifact and can be given. It states what each project's public documents say, and it does not rank the projects.
 2. **Conditions, not verdicts.** State what a protocol does and what evidence a claim needs. Do not state that a product or design is safe or unsafe. Use only the result terms in §1.1.
 3. **Cite mechanism claims.** A statement about how a protocol or signature scheme works needs a public specification. Pin each source to a version in the References section. Where a web page cannot be pinned, record the date it was read.
 4. **Label citations by what the source defines.** A link label names what the specification actually specifies. Do not label an opcode as a recovery mechanism, or an output type as an escrow protocol.

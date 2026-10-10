@@ -17,3 +17,11 @@ A threat-model and evidence-review framework for Bitcoin custody arrangements, f
 **Version 0.3, peer review draft.** See the [changelog](what-can-you-check-about-a-release.md#changelog) for revisions.
 
 A comparison of software release processes, for people deciding what a download page is evidence of and for technical reviewers. It opens with a plain-language Start here section. It separates three checks: whether a change was public, who signed the release file, and whether another builder rebuilt it. It reads Bitcoin Core's release process beside three other well-known processes: the Linux kernel, Tor Browser, and the Debian archive. For each, it records the signed object, where keys are published, where a rebuild sits in the process, and what the person who downloads checks. A side-by-side table puts the same questions to all four. A further section covers provenance records, such as signed hash files, build-information files, SLSA provenance, transparency logs, and timestamps, and maps each to the checks. Every figure is tied to the rule or listing it came from and the date it was read. The note compares processes and does not rank them: no organization is assessed.
+
+## [What Can You Check About an embit Release?](embit-release-records.md)
+
+*The release note's questions, put to one library*
+
+**Version 0.2, peer review draft.** See the [changelog](embit-release-records.md#changelog) for revisions.
+
+A worked example of the release note's method, applied to embit, a Bitcoin library for Python that other projects build on. It opens with a plain-language Start here section. It records three objects: the 0.8.0 file on the Python Package Index, the signed tags for 0.8.1 and 0.8.2 in the source repository, and the written release process that the project added in 0.8.1. For each, it states what the public, signed, and rebuilt checks show, what the person who downloads can check, and what stays unresolved. It notes which object two downstream projects pin. Every reading is tied to a pinned commit or to the date a page was read. The note records release evidence only: it does not assess the library's code, and no person is assessed.
