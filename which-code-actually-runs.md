@@ -6,7 +6,7 @@ This note describes kinds of fallback. It reads two public records as examples.
 
 | Document | which-code-actually-runs.md |
 | :---- | :---- |
-| **Version** | 0.1 — peer review draft |
+| **Version** | 0.2 — peer review draft |
 | **Audience** | People who rely on a wallet, a signing device, or a library to make or use keys: read [Start here](#start-here). Technical reviewers: read the full note. |
 | **Method** | Identify each place where software chooses between two ways to do the same job. For each, record what decides the choice, when, and what a reader could inspect to learn which way ran. Tie each statement to a public source. |
 | **Changes** | See the [changelog](#changelog). |
@@ -22,6 +22,7 @@ This note describes kinds of fallback. It reads two public records as examples.
 - [3. Public records](#3-public-records)
   - [3.1 Coldcard firmware: the random source for seeds](#31-coldcard-firmware-the-random-source-for-seeds)
   - [3.2 embit: the secp256k1 implementation](#32-embit-the-secp256k1-implementation)
+  - [3.3 The release checks, applied to both records](#33-the-release-checks-applied-to-both-records)
 - [4. What separates the two records](#4-what-separates-the-two-records)
 - [5. What a project can show](#5-what-a-project-can-show)
 - [6. Questions that make a claim reviewable](#6-questions-that-make-a-claim-reviewable)
@@ -54,6 +55,8 @@ This section is for anyone who relies on software to make or protect keys. You d
 A claim about a fallback needs a defined object: a function, a build of a program, or an installed copy. "It uses the hardware random source" and "it uses the native library" are claims about what runs. Neither follows from the presence of that code in a source tree or in a binary.
 
 The other notes in this repository stop one step earlier. The release note asks what a published file is evidence of. The custody note lists four levels of build evidence and ends with "evidence that the device runs that binary." This note asks a further question inside one binary or one package: of the alternatives it contains, which one executes. See [What Can You Check About a Software Release? §2](what-can-you-check-about-a-release.md#2-three-checks) and [Who Can Move Your Bitcoin? §3](who-can-move-your-bitcoin.md#3-review-the-complete-custody-lifecycle).
+
+The release note's three checks tie a file to its source and to the keys that vouch for it. None of them shows which path inside the file runs. A reproducible build shows that a binary matches its source. If the source and the build configuration select the fallback, every honest rebuild contains the same fallback, and matching hashes confirm that the fallback was built as written. A signature and a provenance record carry the same limit: each is a statement about the file, not about the path taken inside it. [§3.3](#33-the-release-checks-applied-to-both-records) applies the checks to both records.
 
 This note uses public statements and public source. No device was tested, and no build was reproduced.
 
@@ -113,8 +116,9 @@ Three properties apply to every kind.
 - **Effect, as stated by the maker.** The advisory gives "about 72 bits of entropy rather than the expected 128 bits" for seeds made on the later hardware models before the fixed releases, and the technical account gives a preliminary estimate of about 40 bits for the earlier models. The maker calls these estimates preliminary. The advisory says that attackers "exploited those weak seeds offline by regenerating the corresponding private keys."
 - **The fix, as stated by the maker.** The fixed releases exclude the fallback generator from the build. They add a build-time check that fails unless the board-specific code defines the random function and the fallback object defines no symbols. That check is a fail-closed selection at build time.
 - **What the fix does not change.** The maker says that an update does not repair a seed that affected firmware generated.
+- **Release evidence.** The firmware repository publishes the source. Its release notes describe `signatures.txt` as "PGP signed hashes (SHA-256)" of the firmware files. Its README documents a `make repro` step and says a reader "can rebuild it from source and get **exactly the same bytes**." §3.3 sets this evidence beside the fault.
 
-**Unresolved.** This note did not read the firmware source or rebuild any release. The entropy figures are the maker's preliminary estimates, and the independent analysis gives different bounds under its own conditions. The maker's account says its investigation continues. Both accounts were read through a page reader, so the quotes need a check against the pages.
+**Unresolved.** The repository documents were read at the current commit only. This note did not read whether the `make repro` step existed for each affected release, and it found no published rebuild report for an affected release. This note did not read the firmware source or rebuild any release. The entropy figures are the maker's preliminary estimates, and the independent analysis gives different bounds under its own conditions. The maker's account says its investigation continues. Both accounts were read through a page reader, so the quotes need a check against the pages.
 
 ### 3.2 embit: the secp256k1 implementation
 
@@ -133,6 +137,25 @@ Three properties apply to every kind.
 - **A downstream check.** One downstream project checks its built image for the native library and for the absence of the pure-Python module.
 
 **Unresolved.** As listed in the embit note. This note adds no reading of its own.
+
+### 3.3 The release checks, applied to both records
+
+The checks are those of [What Can You Check About a Software Release? §2](what-can-you-check-about-a-release.md#2-three-checks), and the provenance record of its §5. Each cell states what the public record offers for that check. The last column states what the check leaves open for a fallback.
+
+| Check | Coldcard firmware | embit | What the check leaves open |
+| :---- | :---- | :---- | :---- |
+| **Public** | The firmware source is published. Both accounts trace the fault in that source. | The source history is public (embit note §4). | Whether anyone traced the call from the job to the intended code. Public source makes that trace possible. It does not show that the trace was done. |
+| **Signed** | The repository publishes PGP-signed hashes of the firmware files. | A signed commit for 0.8.0 and signed tags for later versions. No signature on a release file (embit note §4). | A signature vouches for a file. The file can hold the fallback, or both ways. |
+| **Rebuilt** | The repository documents a rebuild that yields "exactly the same bytes." No rebuild report for an affected release was read. | No second builder's report was found (embit note §4). | A matching rebuild shows that the binary matches the source. A fallback selected by the source and the build configuration is reproduced with it. |
+| **Provenance** | Not read for this note. | Attestation steps exist in the release workflow. No completed run was found (embit note §3.3). | A provenance record states how a platform built a file. It does not state which path the file takes when it runs. |
+
+Three points follow from the table.
+
+- **The checks and the fault can both be present.** By the documents read, the firmware had public source, signed hashes, and a documented rebuild. By the maker's account, affected releases still drew seed values from the fallback from March 2021 until the fixed releases.
+- **The checks make a fault findable.** The independent analysis traced the configuration value, the guard, and the linked function in the public source. A reproducible build is what lets a reader trust that the public source describes the shipped binary. The checks did not find the fault. They let someone else confirm it once it was suspected.
+- **For run-time selection, the checks stop earlier still.** A file can be public, signed, and rebuilt, and two copies of it can still run different implementations on two machines. Evidence for the selection then has to come from the installed copy or the built image, not from the release file.
+
+The release checks answer "is this file what its source says?" The question in this note is "what does the source, as built, actually do for this job?" Both questions need an answer, and neither answer supplies the other.
 
 ## 4. What separates the two records
 
@@ -173,6 +196,8 @@ Each control below is paired with the artifact that would let a reader check it.
 | **The fallback is only for other platforms** | Show what excludes it from this build, and a check that the exclusion took effect. |
 | **The fallback gives the same results** | State which results were compared. Parity of results does not cover timing behavior or random values. |
 | **The tests pass** | State whether any test fails when the fallback is in use. A test that passes on both ways does not show which one ran. |
+| **The build is reproducible, so the code is verified** | State what was verified. A matching rebuild shows that the binary matches the source. Ask what shows that the source selects the intended path. |
+| **The release is signed and attested** | State what the signature or attestation covers. Each covers a file. Ask what shows which path the file takes for this job. |
 | **It was reviewed** | State whether the review traced the call from the job to the code, and on which build. |
 | **It is fixed** | State what the fix changes for material made before it. A fix to selection does not change keys already generated. |
 
@@ -184,17 +209,21 @@ Each control below is paired with the artifact that would let a reader check it.
 - No conclusion about one record carries to the other. §4 lists the differences.
 - No organization or person is assessed. The note names a product and a library because their public records are the evidence.
 - Loss figures, attribution, and the course of the incident are out of scope.
+- The note does not weigh the release checks against each other, and it does not say they are of little use. §3.3 states what each one leaves open for a fallback.
 - A fallback is not a fault. The note asks whether its selection can be seen and checked.
 
 ## 8. References
 
-Each source is listed once with the date consulted and the sections that cite it. These pages are not pinned to a version; each was read on 9 October 2026.
+Each source is listed once with the date consulted and the sections that cite it. Repository files are pinned to a commit. The other pages are not pinned to a version; each was read on 9 October 2026.
 
 | Reference | What it defines | Cited in |
 | :---- | :---- | :---- |
 | [COLDCARD Security Advisory](https://blog.coinkite.com/coldcard-mk3-seed-generation-warning/) | The maker's advisory: affected versions, stated effect, and guidance. First published 30 July 2026. | §3.1, §4 |
 | [Technical Deep Dive into the Entropy Issue](https://blog.coinkite.com/entropy-technical-backgrounder/) | The maker's account of the cause, the fix, and the earlier review. First published 30 July 2026. | §3.1, §4, §5 |
 | [Predictable RNG fallback and 32-bit reseed in COLDCARD firmware](https://engineering.block.xyz/blog/predictable-rng-fallback-and-32-bit-reseed-in-coldcard-firmware) | An independent analysis of the configuration, the guard, and the fallback generator. Published 30 July 2026. | §3.1 |
+| [COLDCARD firmware README, commit f28e1b2](https://github.com/Coldcard/firmware/blob/f28e1b267dd61bbe5f0844edcd6dbd7fc28ba5b3/README.md) | The documented reproducible build | §3.1, §3.3 |
+| [COLDCARD firmware releases/README.md, commit f28e1b2](https://github.com/Coldcard/firmware/blob/f28e1b267dd61bbe5f0844edcd6dbd7fc28ba5b3/releases/README.md) | The signed hash file for firmware releases | §3.1, §3.3 |
+| [What Can You Check About a Software Release?](what-can-you-check-about-a-release.md) | The three checks and the provenance record | §1, §3.3 |
 | [What Can You Check About an embit Release? §3.5](embit-release-records.md#35-two-implementations-in-one-release) | The embit record and its pinned sources | §3.2, §4, §5 |
 
 ## Changelog
@@ -203,4 +232,5 @@ Newest first. Versioning follows [STYLE.md](STYLE.md).
 
 | Version | Change |
 | :---- | :---- |
+| 0.2 — 9 October 2026 | Adds §3.3, which applies the release note's public, signed, rebuilt, and provenance checks to both records and states what each check leaves open for a fallback. States the limit in §1: a reproducible build reproduces a fallback that the source selects. Adds the Coldcard firmware repository's signed hash file and documented rebuild to §3.1. Adds two §6 rows and a §7 limit. |
 | 0.1 — 9 October 2026 | First draft. Terms for fallback, selection, and presence versus reachability. Four kinds of fallback. Two public records: Coldcard firmware seed generation, from the maker's account and one independent analysis, and the embit secp256k1 implementation, summarized from the embit note. A table of what separates the two records, a table of controls with the artifact for each, and a list of reviewable claims. |
